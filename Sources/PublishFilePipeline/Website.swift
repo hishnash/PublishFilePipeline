@@ -93,9 +93,14 @@ public extension Website {
                 pendingPipeline.insert(file.canonical)
             }
             
-            outputs = try pipeline.run(with: files, on: context)
+            let orderd = files.sorted { file1, file2 -> Bool in
+                file1.canonical < file1.canonical
+            }
+            
+            outputs = try pipeline.run(with: orderd, on: context)
         case .any(let pipeline):
             let file = try folder.file(at: resource.string)
+            
             outputs = try pipeline.run(with: [PipelineFileWrapper(file: file, rootFolder: folder)], on: context)
         }
         
