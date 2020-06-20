@@ -15,10 +15,8 @@ public struct PipelineFileWrapper {
         self.rootFolder = rootFolder
     }
     
-    var file: File
+    public var file: File
     var rootFolder: Folder
-    
-    
 }
 
 

@@ -37,7 +37,7 @@ public extension Website {
            }
         }
         
-        guard var outputFile = possibleOutputFile else  {
+        guard let outputFile = possibleOutputFile else  {
             throw FilePipelineErrors.fileNotFound(for: resource)
         }
         return Path("/" + outputFile.canonical.string)
@@ -82,7 +82,7 @@ public extension Website {
                 return PipelineFileWrapper(file: file, rootFolder: folder)
             }
             
-            for file in files.filter { $0.canonical != resource } {
+            for file in files.filter({ $0.canonical != resource }) {
                 guard !pendingPipeline.contains(file.canonical) else {
                     throw FilePipelineErrors.recusiveLookup(for: resource)
                 }

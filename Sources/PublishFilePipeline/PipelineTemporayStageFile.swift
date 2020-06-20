@@ -10,8 +10,22 @@ import Files
 import Publish
 
 public struct PipelineTemporayStageFile {
-    var sourceFile: PipelineFileWrapper
-    var file: PipelineFileWrapper
+    var sourceFiles: [PipelineFileWrapper]
+    public var file: PipelineFileWrapper
+    
+    public init?(from sourceFiles: [PipelineFileWrapper], with data: Data, named: String) throws {
+        let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
+        
+        guard let sourceFile = sourceFiles.first else { return nil }
+        
+        let folderPath = sourceFile.canonical.deletingLastPathComponent()
+        let folder = try rootFolder.createSubfolder(at: folderPath.string)
+        
+        let file = try folder.createFileIfNeeded(withName: named, contents: data)
+        
+        self.sourceFiles  = sourceFiles
+        self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
+    }
     
     public init(from sourceFile: PipelineFileWrapper, with data: Data, named: String) throws {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
@@ -21,7 +35,7 @@ public struct PipelineTemporayStageFile {
         
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
-        self.sourceFile  = sourceFile
+        self.sourceFiles  = [sourceFile]
         self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
     }
     
@@ -35,14 +49,14 @@ public struct PipelineTemporayStageFile {
         try file.rename(to: named)
         
         
-        self.sourceFile  = sourceFile
+        self.sourceFiles  = [sourceFile]
         self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
     }
 }
 
 extension PipelineTemporayStageFile: PipelineFile {
     public var source: [PipelineFileWrapper] {
-        [self.sourceFile]
+        self.sourceFiles
     }
     
     public var output: [PipelineFileWrapper] {
