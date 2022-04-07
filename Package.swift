@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -14,8 +14,8 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(name: "Publish", url: "https://github.com/johnsundell/publish.git", from: "0.5.0"),
-        .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto.git", from: "1.0.1"),
+        .package(name: "Publish", url: "https://github.com/johnsundell/publish.git", from: "0.8.0"),
+        .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto.git", from: "2.0.5"),
         .package(url: "https://github.com/eneko/RegEx.git", from: "0.3.0")
     ],
     targets: [

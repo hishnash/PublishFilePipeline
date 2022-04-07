@@ -13,7 +13,11 @@ import RegEx
 
 
 public extension Website {
-    func resourcePath(for resource: Path, with context: PublishingContext<Self>) throws -> Path {
+    func resourcePath(
+        for resource: Path,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws -> Path {
         var resource = resource
         if resource.string.starts(with: "/") {
             resource = Path(String(resource.string.dropFirst()))
@@ -29,7 +33,7 @@ public extension Website {
             return Path("/" + outputFile.canonical.string)
         }
         
-        try self.prossesPath(for: resource, with: context)
+        try self.prossesPath(for: resource, at: originPath, with: context)
         
         possibleOutputFile = PublishPipeline.outputFiles.first { outputFile in
            return outputFile.source.contains { file in
@@ -42,6 +46,27 @@ public extension Website {
         }
         return Path("/" + outputFile.canonical.string)
         
+    }
+    
+    func resourcePaths(
+        ofType extention: String,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws -> Set<Path> {
+        let folder = try context.folder(at: originPath)
+        let paths: [Path] = Array(folder.files.recursive).compactMap { file in
+            guard file.extension == extention else {
+                return nil
+            }
+            return Path(file.path(relativeTo: folder))
+        }
+        var resolvedPaths: Set<Path> = []
+        for path in paths {
+            resolvedPaths.insert(
+                try self.resourcePath(for: path, with: context)
+            )
+        }
+        return resolvedPaths
     }
     
     func prossesPath(
