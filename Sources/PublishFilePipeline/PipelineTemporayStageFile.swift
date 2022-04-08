@@ -19,7 +19,14 @@ public struct PipelineTemporayStageFile {
         guard let sourceFile = sourceFiles.first else { return nil }
         
         let folderPath = sourceFile.canonical.deletingLastPathComponent()
-        let folder = try rootFolder.createSubfolder(at: folderPath.string)
+        
+        let folder: Folder
+        
+        if folderPath.string.isEmpty {
+            folder = rootFolder
+        } else {
+            folder = try rootFolder.createSubfolder(at: folderPath.string)
+        }
         
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
@@ -31,7 +38,13 @@ public struct PipelineTemporayStageFile {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
         
         let folderPath = sourceFile.canonical.deletingLastPathComponent()
-        let folder = try rootFolder.createSubfolder(at: folderPath.string)
+        
+        let folder: Folder
+        if folderPath.string.isEmpty {
+            folder = rootFolder
+        } else {
+            folder = try rootFolder.createSubfolder(at: folderPath.string)
+        }
         
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
@@ -43,11 +56,35 @@ public struct PipelineTemporayStageFile {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
         
         let folderPath = sourceFile.canonical.deletingLastPathComponent()
-        let folder = try rootFolder.createSubfolder(at: folderPath.string)
+        
+        let folder: Folder
+        if folderPath.string.isEmpty {
+            folder = rootFolder
+        } else {
+            folder = try rootFolder.createSubfolder(at: folderPath.string)
+        }
         
         let file = try sourceFile.file.copy(to: folder)
         try file.rename(to: named)
         
+        
+        self.sourceFiles  = [sourceFile]
+        self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
+    }
+    
+    public init(from sourceFile: PipelineFileWrapper, emtpyName named: String) throws {
+        let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
+        
+        let folderPath = sourceFile.canonical.deletingLastPathComponent()
+        
+        let folder: Folder
+        if folderPath.string.isEmpty {
+            folder = rootFolder
+        } else {
+            folder = try rootFolder.createSubfolder(at: folderPath.string)
+        }
+        
+        let file = try folder.createFileIfNeeded(withName: named)
         
         self.sourceFiles  = [sourceFile]
         self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
@@ -69,6 +106,11 @@ extension PipelineTemporayStageFile: PipelineFile {
 }
 
 public struct PipelineFileContainer {
+    public init(children: [PipelineFile], parents: [PipelineFile]) {
+        self.children = children
+        self.parents = parents
+    }
+    
     var children: [PipelineFile]
     var parents: [PipelineFile]
 }
