@@ -9,6 +9,7 @@ import Foundation
 import Publish
 import Files
 import RegEx
+import Dispatch
 
 public enum PublishPipelineFilter {
     case files(regex: RegEx, with: PublishPipeline)
@@ -24,12 +25,65 @@ public enum PublishPipelineFilter {
     }
 }
 
-public struct PublishPipeline {
-    static var outputFiles: [PipelineFile] = []
-    static var pendingFiles: Set<Path> = []
+class PipelineState {
+    private var queue = DispatchQueue(label: "PipelineState")
     
-    // originPath -> Path -> File
-    static var additionalFiles: [Path: [Path: File]] = [:]
+    private var _outputFiles: [PipelineFile] = []
+    private var _pendingFiles: Set<Path> = []
+    private var _additionalFiles: [Path: [Path: File]] = [:]
+        
+    var outputFiles: [PipelineFile] {
+        queue.sync {
+            self.outputFiles
+        }
+    }
+    
+    var pendingFiles: [PipelineFile] {
+        queue.sync {
+            self.pendingFiles
+        }
+    }
+    
+    var additionalFiles: [Path: [Path: File]] {
+        queue.sync {
+            self.additionalFiles
+        }
+    }
+    
+    func set(outputs: [PipelineFile]) {
+        queue.sync {
+            self._outputFiles = outputs
+        }
+    }
+    
+    func additionalFiles(at originPath: Path = "Resources") -> [Path: File] {
+        queue.sync {
+            self._additionalFiles[originPath] ?? [:]
+        }
+    }
+    
+    func add(outputs: [PipelineFile]) {
+        queue.sync {
+            self._outputFiles.append(contentsOf: outputs)
+        }
+    }
+    
+    func set(file: File, for resource: Path, at originPath: Path) {
+        queue.sync {
+            _additionalFiles[originPath, default: [:]][resource] = file
+        }
+    }
+}
+
+
+public struct PublishPipeline {
+    static var state = PipelineState()
+    
+//    static var outputFiles: [PipelineFile] = []
+//    static var pendingFiles: Set<Path> = []
+//
+//    // originPath -> Path -> File
+//    static var additionalFiles: [Path: [Path: File]] = [:]
     
     var stages: [PipelineStage]
     

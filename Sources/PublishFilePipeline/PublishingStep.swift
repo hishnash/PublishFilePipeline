@@ -22,7 +22,8 @@ public extension PublishingStep {
                 PipelineFileWrapper(file: file, path: path)
             }
             let outputFiles = try pipeline.run(with: files, on: context)
-            PublishPipeline.outputFiles = outputFiles
+            PublishPipeline.state.set(outputs: outputFiles)
+            
             for output in outputFiles {
                 for wrappedFile in output.output {
                     try context.copyToOutput(

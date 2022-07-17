@@ -26,7 +26,7 @@ public extension Website {
         
         let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
         let file = try tempFolder.createFile(at: resource.string, contents: data)
-        PublishPipeline.additionalFiles[originPath, default: [:]][resource] = file
+        PublishPipeline.state.set(file: file, for: resource, at: originPath)
     }
     
     func resourcePath(
@@ -39,7 +39,7 @@ public extension Website {
             resource = Path(String(resource.string.dropFirst()))
         }
         
-        var possibleOutputFile = PublishPipeline.outputFiles.first { outputFile in
+        var possibleOutputFile = PublishPipeline.state.outputFiles.first { outputFile in
             return outputFile.source.contains { file in
                 return file.canonical == resource
             }
@@ -51,7 +51,7 @@ public extension Website {
         
         try self.processPath(for: resource, at: originPath, with: context)
         
-        possibleOutputFile = PublishPipeline.outputFiles.first { outputFile in
+        possibleOutputFile = PublishPipeline.state.outputFiles.first { outputFile in
            return outputFile.source.contains { file in
                return file.canonical == resource
            }
@@ -91,7 +91,7 @@ public extension Website {
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws -> File {
-        if let file = PublishPipeline.additionalFiles[originPath]?[resource] {
+        if let file = PublishPipeline.state.additionalFiles[originPath]?[resource] {
             return file
         }
         let folder = try context.folder(at: originPath)
@@ -102,7 +102,7 @@ public extension Website {
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws -> [(file: File, path: Path)] {
-        let files = PublishPipeline.additionalFiles[originPath, default: [:]].map { (path, file) in
+        let files = PublishPipeline.state.additionalFiles[originPath, default: [:]].map { (path, file) in
             return (file: file, path: path)
         }
         
@@ -130,9 +130,7 @@ public extension Website {
         defer {
             pendingPipeline.remove(resource)
         }
-        
-        let folder = try context.folder(at: originPath)
-        
+                
         let _pipelineFilter = installedPipelines.first { (filter) -> Bool in
             filter.matches(resource)
         }
@@ -181,7 +179,7 @@ public extension Website {
         }
         
         
-        PublishPipeline.outputFiles.append(contentsOf: outputs)
+        PublishPipeline.state.add(outputs: outputs)
         
         for output in outputs {
             for wrappedFile in output.output {
