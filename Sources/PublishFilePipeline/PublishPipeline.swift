@@ -28,6 +28,9 @@ public struct PublishPipeline {
     static var outputFiles: [PipelineFile] = []
     static var pendingFiles: Set<Path> = []
     
+    // originPath -> Path -> File
+    static var additionalFiles: [Path: [Path: File]] = [:]
+    
     var stages: [PipelineStage]
     
     func run<Site>(with files: [PipelineFile], on context: PublishingContext<Site>) throws ->  [PipelineFile] where Site: Website {

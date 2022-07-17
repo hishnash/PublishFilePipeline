@@ -17,10 +17,9 @@ public extension PublishingStep {
         includingFolder includeFolder: Bool = false
     ) -> Self {
         step(named: "Copy '\(originPath)' files") { context in
-            let folder = try context.folder(at: originPath)
             
-            let files: [PipelineFile] = Array(folder.files.recursive).map { file in
-                PipelineFileWrapper(file: file, rootFolder: folder)
+            let files: [PipelineFile] = try context.site.files(at: originPath,  with: context).map { (file, path) in
+                PipelineFileWrapper(file: file, path: path)
             }
             let outputFiles = try pipeline.run(with: files, on: context)
             PublishPipeline.outputFiles = outputFiles

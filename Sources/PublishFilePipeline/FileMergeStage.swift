@@ -9,10 +9,10 @@ import Foundation
 import Publish
 
 public struct FileMergeStage: PipelineStage {
-    let extention: String
+    let fileExtension: String
     
-    public init (extention: String) {
-        self.extention = extention
+    public init (fileExtension: String) {
+        self.fileExtension = fileExtension
     }
     
     public func run<Site>(with files: [PipelineFile], on context: PublishingContext<Site>) throws -> [PipelineFile] where Site : Website {
@@ -27,10 +27,10 @@ public struct FileMergeStage: PipelineStage {
         
         let inputs: [PipelineFileWrapper] = files.flatMap { file in file.output }
         
-        let file = try PipelineTemporayStageFile(
+        let file = try PipelineTemporaryStageFile(
             from: inputs,
             with: data,
-            named: "merged.\(self.extention)"
+            named: "merged.\(self.fileExtension)"
         )!
         
         
@@ -44,6 +44,4 @@ public struct FileMergeStage: PipelineStage {
             )
         ]
     }
-    
-    
 }

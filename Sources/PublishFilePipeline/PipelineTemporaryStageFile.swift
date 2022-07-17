@@ -9,7 +9,7 @@ import Foundation
 import Files
 import Publish
 
-public struct PipelineTemporayStageFile {
+public struct PipelineTemporaryStageFile {
     var sourceFiles: [PipelineFileWrapper]
     public var file: PipelineFileWrapper
     
@@ -31,7 +31,7 @@ public struct PipelineTemporayStageFile {
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
         self.sourceFiles  = sourceFiles
-        self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
+        self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
     }
     
     public init(from sourceFile: PipelineFileWrapper, with data: Data, named: String) throws {
@@ -49,7 +49,7 @@ public struct PipelineTemporayStageFile {
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
         self.sourceFiles  = [sourceFile]
-        self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
+        self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
     }
     
     public init(from sourceFile: PipelineFileWrapper, named: String) throws {
@@ -69,7 +69,7 @@ public struct PipelineTemporayStageFile {
         
         
         self.sourceFiles  = [sourceFile]
-        self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
+        self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
     }
     
     public init(from sourceFile: PipelineFileWrapper, emtpyName named: String) throws {
@@ -87,11 +87,11 @@ public struct PipelineTemporayStageFile {
         let file = try folder.createFileIfNeeded(withName: named)
         
         self.sourceFiles  = [sourceFile]
-        self.file = PipelineFileWrapper(file: file, rootFolder: rootFolder)
+        self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
     }
 }
 
-extension PipelineTemporayStageFile: PipelineFile {
+extension PipelineTemporaryStageFile: PipelineFile {
     public var source: [PipelineFileWrapper] {
         self.sourceFiles
     }

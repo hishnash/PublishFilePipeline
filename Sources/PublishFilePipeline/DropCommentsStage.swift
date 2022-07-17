@@ -33,7 +33,7 @@ public struct DropCommentsStage: PipelineStage {
     func handle(_ wrappedFile: PipelineFileWrapper) throws -> PipelineFile {
         let name = "\(wrappedFile.file.nameExcludingExtension)-cleaned.\(wrappedFile.file.extension ?? "bin")"
 
-        let result = try PipelineTemporayStageFile(from: wrappedFile, emtpyName: name)
+        let result = try PipelineTemporaryStageFile(from: wrappedFile, emtpyName: name)
         var lastLine: String? = nil
         let fileAsString = try wrappedFile.file.readAsString()
         // Loop over lines

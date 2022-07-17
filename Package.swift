@@ -1,11 +1,11 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "PublishFilePipeline",
-    platforms: [.macOS(.v10_15)],
+    platforms: [.macOS(.v13)],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
@@ -14,8 +14,8 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(name: "Publish", url: "https://github.com/johnsundell/publish.git", from: "0.8.0"),
-        .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto.git", from: "2.0.5"),
+        .package(url: "https://github.com/johnsundell/publish.git", from: "0.9.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "2.1.0"),
         .package(url: "https://github.com/eneko/RegEx.git", from: "0.3.0")
     ],
     targets: [
@@ -24,7 +24,7 @@ let package = Package(
         .target(
             name: "PublishFilePipeline",
             dependencies: [
-                "Publish",
+                .product(name: "Publish", package: "Publish"),
                 .product(name: "Crypto", package: "swift-crypto"),
                 "RegEx"
             ]

@@ -10,13 +10,13 @@ import Files
 import Publish
 
 public struct PipelineFileWrapper {
-    public init(file: File, rootFolder: Folder) {
+    public init(file: File, path: Path) {
         self.file = file
-        self.rootFolder = rootFolder
+        self.canonical = path
     }
     
     public var file: File
-    var rootFolder: Folder
+    public var canonical: Path
 }
 
 
@@ -27,9 +27,5 @@ extension PipelineFileWrapper: PipelineFile {
     
     public var output: [PipelineFileWrapper] {
         return [self]
-    }
-    
-    public var canonical: Path {
-        return Path(self.file.path(relativeTo: self.rootFolder))
     }
 }

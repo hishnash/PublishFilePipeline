@@ -51,6 +51,6 @@ public struct StringReplaceStage: PipelineStage {
             }
         }
         
-        return try PipelineTemporayStageFile(from: wrappedFile, with: result.data(using: .utf8)!, named: wrappedFile.file.name)
+        return try PipelineTemporaryStageFile(from: wrappedFile, with: result.data(using: .utf8)!, named: wrappedFile.file.name)
     }
 }

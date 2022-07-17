@@ -39,6 +39,6 @@ public struct CacheBustStage: PipelineStage {
         let hash = Data(digest).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         let name = "\(wrappedFile.file.nameExcludingExtension).\(hash).\(wrappedFile.file.extension ?? "bin")"
         
-        return try PipelineTemporayStageFile(from: wrappedFile, named: name)
+        return try PipelineTemporaryStageFile(from: wrappedFile, named: name)
     }
 }

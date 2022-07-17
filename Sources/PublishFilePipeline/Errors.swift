@@ -11,7 +11,7 @@ import Files
 
 public enum FilePipelineErrors: Error {
     case fileNotFound(for: Path)
-    case recusiveLookup(for: Path)
+    case recursiveLookup(for: Path)
     case missingPipeline
 }
 

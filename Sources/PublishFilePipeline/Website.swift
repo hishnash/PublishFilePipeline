@@ -13,6 +13,22 @@ import RegEx
 
 
 public extension Website {
+    func add(
+        resource data: Data,
+        for resource: Path,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws {
+        var resource = resource
+        if resource.string.starts(with: "/") {
+            resource = Path(String(resource.string.dropFirst()))
+        }
+        
+        let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
+        let file = try tempFolder.createFile(at: resource.string, contents: data)
+        PublishPipeline.additionalFiles[originPath, default: [:]][resource] = file
+    }
+    
     func resourcePath(
         for resource: Path,
         at originPath: Path = "Resources",
@@ -28,12 +44,12 @@ public extension Website {
                 return file.canonical == resource
             }
         }
-        
+                
         if let outputFile = possibleOutputFile {
             return Path("/" + outputFile.canonical.string)
         }
         
-        try self.prossesPath(for: resource, at: originPath, with: context)
+        try self.processPath(for: resource, at: originPath, with: context)
         
         possibleOutputFile = PublishPipeline.outputFiles.first { outputFile in
            return outputFile.source.contains { file in
@@ -49,16 +65,16 @@ public extension Website {
     }
     
     func resourcePaths(
-        ofType extention: String,
+        ofType type: String,
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws -> Set<Path> {
-        let folder = try context.folder(at: originPath)
-        let paths: [Path] = Array(folder.files.recursive).compactMap { file in
-            guard file.extension == extention else {
+
+        let paths: [Path] = try self.files(at: originPath, with: context).compactMap { (file, path) in
+            guard file.extension == type else {
                 return nil
             }
-            return Path(file.path(relativeTo: folder))
+            return path
         }
         var resolvedPaths: Set<Path> = []
         for path in paths {
@@ -69,14 +85,44 @@ public extension Website {
         return resolvedPaths
     }
     
-    func prossesPath(
+    
+    func file(
+        for resource: Path,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws -> File {
+        if let file = PublishPipeline.additionalFiles[originPath]?[resource] {
+            return file
+        }
+        let folder = try context.folder(at: originPath)
+        return try folder.file(at: resource.string)
+    }
+    
+    func files(
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws -> [(file: File, path: Path)] {
+        let files = PublishPipeline.additionalFiles[originPath, default: [:]].map { (path, file) in
+            return (file: file, path: path)
+        }
+        
+        let folder = try context.folder(at: originPath)
+        let realFiles = Array(folder.files.recursive).map { file in
+            let path = Path(file.path(relativeTo: folder))
+            return (file: file, path: path)
+        }
+        
+        return files + realFiles
+    }
+    
+    func processPath(
         for resource: Path,
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws {
         
         guard !pendingPipeline.contains(resource) else {
-            throw FilePipelineErrors.recusiveLookup(for: resource)
+            throw FilePipelineErrors.recursiveLookup(for: resource)
         }
         
         pendingPipeline.insert(resource)
@@ -100,33 +146,38 @@ public extension Website {
         switch pipelineFilter {
         case .files(_, let pipeline):
             
-            let files: [PipelineFile] = Array(folder.files.recursive).compactMap { file in
-                guard pipelineFilter.matches(Path(file.path)) else {
+            let allFiles = try self.files(at: originPath, with: context)
+            let files: [(path: Path, file: PipelineFile)] = allFiles.compactMap { (file, path) in
+                guard pipelineFilter.matches(path) else {
                     return nil
                 }
-                return PipelineFileWrapper(file: file, rootFolder: folder)
+                return (path, PipelineFileWrapper(file: file, path: path))
             }
             
-            for file in files.filter({ $0.canonical != resource }) {
-                guard !pendingPipeline.contains(file.canonical) else {
-                    throw FilePipelineErrors.recusiveLookup(for: resource)
+            for (path, _) in files.filter({ $0.path != resource }) {
+                guard !pendingPipeline.contains(path) else {
+                    throw FilePipelineErrors.recursiveLookup(for: resource)
                 }
                 
                 defer {
-                    pendingPipeline.remove(file.canonical)
+                    pendingPipeline.remove(path)
                 }
-                pendingPipeline.insert(file.canonical)
+                pendingPipeline.insert(path)
             }
             
-            let orderd = files.sorted { file1, file2 -> Bool in
-                file1.canonical < file1.canonical
+            let ordered = files.sorted { a, b -> Bool in
+                a.path < b.path
+            }.map { (_, file) in
+                return file
             }
             
-            outputs = try pipeline.run(with: orderd, on: context)
+            outputs = try pipeline.run(with: ordered, on: context)
         case .any(let pipeline):
-            let file = try folder.file(at: resource.string)
-            
-            outputs = try pipeline.run(with: [PipelineFileWrapper(file: file, rootFolder: folder)], on: context)
+            let file = try self.file(for: resource, at: originPath, with: context)
+            outputs = try pipeline.run(
+                with: [PipelineFileWrapper(file: file, path: resource)],
+                on: context
+            )
         }
         
         
