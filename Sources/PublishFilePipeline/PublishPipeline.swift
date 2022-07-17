@@ -29,24 +29,17 @@ class PipelineState {
     private var queue = DispatchQueue(label: "PipelineState")
     
     private var _outputFiles: [PipelineFile] = []
-    private var _pendingFiles: Set<Path> = []
     private var _additionalFiles: [Path: [Path: File]] = [:]
         
     var outputFiles: [PipelineFile] {
         queue.sync {
-            self.outputFiles
-        }
-    }
-    
-    var pendingFiles: [PipelineFile] {
-        queue.sync {
-            self.pendingFiles
+            self._outputFiles
         }
     }
     
     var additionalFiles: [Path: [Path: File]] {
         queue.sync {
-            self.additionalFiles
+            self._additionalFiles
         }
     }
     
