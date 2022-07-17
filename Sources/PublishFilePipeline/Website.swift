@@ -121,15 +121,15 @@ public extension Website {
         with context: PublishingContext<Self>
     ) throws {
         
-        guard !pendingPipeline.contains(resource) else {
-            throw FilePipelineErrors.recursiveLookup(for: resource)
-        }
-        
-        pendingPipeline.insert(resource)
-        
-        defer {
-            pendingPipeline.remove(resource)
-        }
+//        guard !pendingPipeline.contains(resource) else {
+//            throw FilePipelineErrors.recursiveLookup(for: resource)
+//        }
+//        
+//        pendingPipeline.insert(resource)
+//        
+//        defer {
+//            pendingPipeline.remove(resource)
+//        }
                 
         let _pipelineFilter = installedPipelines.first { (filter) -> Bool in
             filter.matches(resource)
@@ -151,17 +151,17 @@ public extension Website {
                 }
                 return (path, PipelineFileWrapper(file: file, path: path))
             }
-            
-            for (path, _) in files.filter({ $0.path != resource }) {
-                guard !pendingPipeline.contains(path) else {
-                    throw FilePipelineErrors.recursiveLookup(for: resource)
-                }
-                
-                defer {
-                    pendingPipeline.remove(path)
-                }
-                pendingPipeline.insert(path)
-            }
+//            
+//            for (path, _) in files.filter({ $0.path != resource }) {
+//                guard !pendingPipeline.contains(path) else {
+//                    throw FilePipelineErrors.recursiveLookup(for: resource)
+//                }
+//                
+//                defer {
+//                    pendingPipeline.remove(path)
+//                }
+//                pendingPipeline.insert(path)
+//            }
             
             let ordered = files.sorted { a, b -> Bool in
                 a.path < b.path
@@ -204,7 +204,7 @@ public extension Website {
 
 
 var installedPipelines: [PublishPipelineFilter] = []
-var pendingPipeline: Set<Path> = []
+//var pendingPipeline: Set<Path> = []
 
 
 public extension Website {
