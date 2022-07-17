@@ -31,6 +31,7 @@ class PipelineState {
     private var _outputFiles: [PipelineFile] = []
     private var _additionalFiles: [Path: [Path: File]] = [:]
         
+    var lock = DispatchSemaphore(value: 1)
     var outputFiles: [PipelineFile] {
         queue.sync {
             self._outputFiles

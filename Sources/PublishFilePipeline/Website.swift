@@ -34,6 +34,7 @@ public extension Website {
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws -> Path {
+
         var resource = resource
         if resource.string.starts(with: "/") {
             resource = Path(String(resource.string.dropFirst()))
@@ -120,16 +121,10 @@ public extension Website {
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws {
-        
-//        guard !pendingPipeline.contains(resource) else {
-//            throw FilePipelineErrors.recursiveLookup(for: resource)
-//        }
-//        
-//        pendingPipeline.insert(resource)
-//        
-//        defer {
-//            pendingPipeline.remove(resource)
-//        }
+        PublishPipeline.state.lock.wait()
+        defer {
+            PublishPipeline.state.lock.signal()
+        }
                 
         let _pipelineFilter = installedPipelines.first { (filter) -> Bool in
             filter.matches(resource)
