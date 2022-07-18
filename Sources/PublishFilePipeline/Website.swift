@@ -27,6 +27,7 @@ public extension Website {
         let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
         let file = try tempFolder.createFile(at: resource.string, contents: data)
         PublishPipeline.state.set(file: file, for: resource, at: originPath)
+        try self.process(for: resource, with: context)
     }
     
     func resourcePath(
@@ -105,7 +106,7 @@ public extension Website {
         return files + realFiles
     }
     
-    func processPath(
+    func process(
         for resource: Path,
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
@@ -194,10 +195,10 @@ public extension Website {
             at: path,
             using: [
                 .group(plugins.map(PublishingStep.installPlugin)),
+                .processThroughPipeline(),
                 .addMarkdownFiles(),
                 .sortItems(by: \.date, order: .descending),
                 .group(additionalSteps),
-                .processThroughPipeline(),
                 .generateHTML(withTheme: theme, indentation: indentation),
                 .unwrap(rssFeedConfig) { config in
                     .generateRSSFeed(

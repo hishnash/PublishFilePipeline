@@ -14,10 +14,10 @@ public extension PublishingStep {
     static func processThroughPipeline(
         at originPath: Path = "Resources"
     ) -> Self {
-        step(named: "Copy '\(originPath)' files") { context in
+        step(named: "Pipeline '\(originPath)' files") { context in
             
             for (_, path) in try context.site.files(at: originPath, with: context) {
-                try context.site.processPath(for: path, with: context)
+                try context.site.process(for: path, with: context)
             }
         }
     }
