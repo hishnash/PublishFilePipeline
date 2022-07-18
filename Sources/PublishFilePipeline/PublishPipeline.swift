@@ -28,7 +28,7 @@ public enum PublishPipelineFilter {
 class PipelineState {
     private var queue = DispatchQueue(label: "PipelineState")
     
-    private var _outputFiles: [any PipelineFile] = []
+    private var _outputFiles: [Path: PipelineFile] = [:]
     private var _additionalFiles: [Path: [Path: File]] = [:]
     private var _outputRefCount: [Path: Int] = [:]
     
@@ -45,9 +45,9 @@ class PipelineState {
         }
     }
     
-    var outputFiles: [PipelineFile] {
+    var outputFiles: some Sequence<PipelineFile> {
         queue.sync {
-            self._outputFiles
+            self._outputFiles.values
         }
     }
     
@@ -57,9 +57,12 @@ class PipelineState {
         }
     }
     
-    func set(outputs: [PipelineFile]) {
+    func set(outputs: some Sequence<PipelineFileWrapper>) {
         queue.sync {
-            self._outputFiles = outputs
+            self._outputFiles = [:]
+            for output in outputs {
+                self._outputFiles[output.canonical] = output
+            }
         }
     }
     
@@ -69,9 +72,11 @@ class PipelineState {
         }
     }
     
-    func add(outputs: [PipelineFile]) {
+    func add(outputs: some Sequence<PipelineFile>) {
         queue.sync {
-            self._outputFiles.append(contentsOf: outputs)
+            for output in outputs {
+                self._outputFiles[output.canonical] = output
+            }
         }
     }
     

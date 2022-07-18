@@ -9,7 +9,7 @@ import Foundation
 import Files
 import Publish
 
-public struct PipelineFileWrapper {
+public struct PipelineFileWrapper: Hashable {
     public init(file: File, path: Path) {
         self.file = file
         self.canonical = path
@@ -17,6 +17,15 @@ public struct PipelineFileWrapper {
     
     public var file: File
     public var canonical: Path
+    
+    public func hash(into hasher: inout Hasher) {
+        canonical.hash(into: &hasher)
+    }
+    
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.canonical == rhs.canonical
+    }
+    
 }
 
 
