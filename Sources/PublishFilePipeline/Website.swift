@@ -197,6 +197,7 @@ public extension Website {
                 .addMarkdownFiles(),
                 .sortItems(by: \.date, order: .descending),
                 .group(additionalSteps),
+                .processThroughPipeline(),
                 .generateHTML(withTheme: theme, indentation: indentation),
                 .unwrap(rssFeedConfig) { config in
                     .generateRSSFeed(
@@ -205,6 +206,7 @@ public extension Website {
                     )
                 },
                 .generateSiteMap(indentedBy: indentation),
+                .copyPipelineFiles(),
                 .unwrap(deploymentMethod, PublishingStep.deploy)
             ],
             file: file
