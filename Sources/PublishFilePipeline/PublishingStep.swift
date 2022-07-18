@@ -10,26 +10,29 @@ import Publish
 import Files
 
 public extension PublishingStep {
-    static func copyResourcesThroughPipeline(
-        with pipeline: PublishPipeline,
-        at originPath: Path = "Resources",
-        to targetFolderPath: Path? = nil,
-        includingFolder includeFolder: Bool = false
+    
+    static func processThroughPipeline(
+        at originPath: Path = "Resources"
     ) -> Self {
         step(named: "Copy '\(originPath)' files") { context in
             
-            let files: [PipelineFile] = try context.site.files(at: originPath,  with: context).map { (file, path) in
-                PipelineFileWrapper(file: file, path: path)
+            for (_, path) in try context.site.files(at: originPath, with: context) {
+                try context.site.processPath(for: path, with: context)
             }
-            let outputFiles = try pipeline.run(with: files, on: context)
-            PublishPipeline.state.set(outputs: outputFiles)
-            
-            for output in outputFiles {
+        }
+    }
+    
+    static func copyPipelineFiles() -> Self {
+        step(named: "Copy files") { context in
+            let refs = PublishPipeline.state.references
+            for output in PublishPipeline.state.outputFiles {
                 for wrappedFile in output.output {
-                    try context.copyToOutput(
-                        wrappedFile.file,
-                        to: wrappedFile.canonical.deletingLastPathComponent()
-                   )
+                    if refs[wrappedFile.canonical, default: 0] >= 1 {
+                        try context.copyToOutput(
+                            wrappedFile.file,
+                            to: wrappedFile.canonical.deletingLastPathComponent()
+                        )
+                    }
                 }
             }
         }

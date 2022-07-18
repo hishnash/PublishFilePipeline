@@ -40,29 +40,18 @@ public extension Website {
             resource = Path(String(resource.string.dropFirst()))
         }
         
-        var possibleOutputFile = PublishPipeline.state.outputFiles.first { outputFile in
+        let possibleOutputFile = PublishPipeline.state.outputFiles.first { outputFile in
             return outputFile.source.contains { file in
                 return file.canonical == resource
             }
         }
-                
+    
         if let outputFile = possibleOutputFile {
+            PublishPipeline.state.reference(outputFile)
             return Path("/" + outputFile.canonical.string)
         }
         
-        try self.processPath(for: resource, at: originPath, with: context)
-        
-        possibleOutputFile = PublishPipeline.state.outputFiles.first { outputFile in
-           return outputFile.source.contains { file in
-               return file.canonical == resource
-           }
-        }
-        
-        guard let outputFile = possibleOutputFile else  {
-            throw FilePipelineErrors.fileNotFound(for: resource)
-        }
-        return Path("/" + outputFile.canonical.string)
-        
+        throw FilePipelineErrors.fileNotFound(for: resource)
     }
     
     func resourcePaths(
@@ -121,11 +110,7 @@ public extension Website {
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws {
-        PublishPipeline.state.lock.wait()
-        defer {
-            PublishPipeline.state.lock.signal()
-        }
-                
+
         let _pipelineFilter = installedPipelines.first { (filter) -> Bool in
             filter.matches(resource)
         }
@@ -146,17 +131,6 @@ public extension Website {
                 }
                 return (path, PipelineFileWrapper(file: file, path: path))
             }
-//            
-//            for (path, _) in files.filter({ $0.path != resource }) {
-//                guard !pendingPipeline.contains(path) else {
-//                    throw FilePipelineErrors.recursiveLookup(for: resource)
-//                }
-//                
-//                defer {
-//                    pendingPipeline.remove(path)
-//                }
-//                pendingPipeline.insert(path)
-//            }
             
             let ordered = files.sorted { a, b -> Bool in
                 a.path < b.path
@@ -173,17 +147,7 @@ public extension Website {
             )
         }
         
-        
         PublishPipeline.state.add(outputs: outputs)
-        
-        for output in outputs {
-            for wrappedFile in output.output {
-                try context.copyToOutput(
-                    wrappedFile.file,
-                    to: wrappedFile.canonical.deletingLastPathComponent()
-               )
-            }
-        }
     }
 }
 

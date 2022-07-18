@@ -28,10 +28,23 @@ public enum PublishPipelineFilter {
 class PipelineState {
     private var queue = DispatchQueue(label: "PipelineState")
     
-    private var _outputFiles: [PipelineFile] = []
+    private var _outputFiles: [any PipelineFile] = []
     private var _additionalFiles: [Path: [Path: File]] = [:]
-        
-    var lock = DispatchSemaphore(value: 1)
+    private var _outputRefCount: [Path: Int] = [:]
+    
+    
+    func reference(_ file: PipelineFile) {
+        queue.async {
+            self._outputRefCount[file.canonical, default: 0] += 1
+        }
+    }
+    
+    var references: [Path: Int] {
+        queue.sync {
+            self._outputRefCount
+        }
+    }
+    
     var outputFiles: [PipelineFile] {
         queue.sync {
             self._outputFiles
