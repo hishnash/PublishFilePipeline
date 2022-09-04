@@ -30,6 +30,18 @@ public extension Website {
         try self.process(for: resource, with: context)
     }
     
+    func add(
+        file: File,
+        for resource: Path,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws {
+        let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
+        let fileToUse = try file.copy(to: tempFolder)
+        PublishPipeline.state.set(file: fileToUse, for: resource, at: originPath)
+        try self.process(for: resource, with: context)
+    }
+    
     func resourcePath(
         for resource: Path,
         at originPath: Path = "Resources",
