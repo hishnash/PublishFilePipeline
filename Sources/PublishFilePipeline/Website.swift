@@ -42,6 +42,21 @@ public extension Website {
         try self.process(for: resource, with: context)
     }
     
+    func processedFile(
+        for resource: Path,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>
+    ) throws -> File {
+        var resource = resource
+        if resource.string.starts(with: "/") {
+            resource = Path(String(resource.string.dropFirst()))
+        }
+        if let file = PublishPipeline.state.outputFile(at: resource) {
+            return file
+        }
+        throw FilePipelineErrors.fileNotFound(for: resource)
+    }
+    
     func resourcePath(
         for resource: Path,
         at originPath: Path = "Resources",

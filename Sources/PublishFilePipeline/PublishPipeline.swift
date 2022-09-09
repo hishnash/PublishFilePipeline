@@ -45,9 +45,9 @@ class PipelineState {
         }
     }
     
-    var outputFiles: some Sequence<PipelineFile> {
+    var outputFiles: [PipelineFile] {
         queue.sync {
-            self._outputFiles.values
+            Array(self._outputFiles.values)
         }
     }
     
@@ -57,7 +57,13 @@ class PipelineState {
         }
     }
     
-    func set(outputs: some Sequence<PipelineFileWrapper>) {
+    func outputFile(at path: Path) -> File? {
+        queue.sync {
+            self._outputFiles[path]?.output.first?.file
+        }
+    }
+    
+    func set<S: Sequence>(outputs: S) where S.Element == PipelineFileWrapper {
         queue.sync {
             self._outputFiles = [:]
             for output in outputs {
@@ -72,7 +78,7 @@ class PipelineState {
         }
     }
     
-    func add(outputs: some Sequence<PipelineFile>) {
+    func add<S: Sequence>(outputs: S) where S.Element == any PipelineFile {
         queue.sync {
             for output in outputs {
                 self._outputFiles[output.canonical] = output
