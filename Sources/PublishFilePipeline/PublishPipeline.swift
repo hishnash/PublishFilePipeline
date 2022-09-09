@@ -58,9 +58,11 @@ class PipelineState {
     }
     
     func outputFile(at path: Path) -> File? {
-        queue.sync {
-            self._outputFiles[path]?.output.first?.file
-        }
+        PublishPipeline.state.outputFiles.first { outputFile in
+            return outputFile.source.contains { file in
+                return file.canonical == path
+            }
+        }?.output.first?.file
     }
     
     func set<S: Sequence>(outputs: S) where S.Element == PipelineFileWrapper {
