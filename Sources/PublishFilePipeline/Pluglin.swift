@@ -75,8 +75,8 @@ public extension Modifier {
        }
    }
     static func pipelineHTML<Site: Website>(with context: PublishingContext<Site>) -> Self {
-        return Modifier(target: .html) { html, markdown in
-            let result = Modifier.regex.replaceMatches(in: html)  { match in
+        Modifier(target: .html) { html, markdown in
+            let updatedHTML = Modifier.regex.replaceMatches(in: html)  { match in
                 guard let path = match.values[1] else {
                     return ""
                 }
@@ -84,16 +84,11 @@ public extension Modifier {
                     let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
                     return mappedPath.string
                 } catch {
-                    #if DEBUG
-                    print("ERROR ----\n", error)
-                    return String(match.values[0] ?? "")
-                    #else
-                    throw error
-                    #endif
+                    fatalError("Unable to find file for `\(String(path))`")
                 }
                 
             }
-            return result
+            return updatedHTML
        }
    }
     static let regex: RegEx = try! RegEx(pattern: #"(/[^"\s]+\.[a-z]{1,})"#)
