@@ -84,12 +84,17 @@ public extension Modifier {
                     let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
                     return mappedPath.string
                 } catch {
+                    #if DEBUG
+                    print("ERROR ----\n", error)
                     return String(match.values[0] ?? "")
+                    #else
+                    throw error
+                    #endif
                 }
                 
             }
             return result
        }
    }
-    static let regex: RegEx = try! RegEx(pattern: #"(/[^"\s]+)"#)
+    static let regex: RegEx = try! RegEx(pattern: #"(/[^"\s]+\.[a-z]{1,})"#)
 }
