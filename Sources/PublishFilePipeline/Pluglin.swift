@@ -82,7 +82,7 @@ public extension Modifier {
                 }
                 do {
                     let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
-                    return "\"\(mappedPath.string)\""
+                    return mappedPath.string
                 } catch {
                     fatalError("Unable to find file for `\(String(path))`")
                 }
@@ -91,5 +91,8 @@ public extension Modifier {
             return updatedHTML
        }
    }
-    static let regex: RegEx = try! RegEx(pattern: #"\"(/[^"\s]+\.[a-z]{1,})\""#)
+    static let regex: RegEx = try! RegEx(pattern: #"(?<!https:/)(?<!http:/)(/[^/]{1}[^"\s]+\.[a-z]{1,})"#)
+//    static let a = #"(?<!https:/)(?<!http:/)(/[^/]{1}[^"\s]+\.[a-z]{1,})"#
 }
+
+
