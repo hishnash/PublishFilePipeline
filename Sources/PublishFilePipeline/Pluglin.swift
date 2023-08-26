@@ -91,7 +91,7 @@ public extension Modifier {
             return updatedHTML
        }
    }
-    static let regex: RegEx = try! RegEx(pattern: #"(?<!https:/)(?<!http:/)(/[^/]{1}[^"\s]+\.[a-z]{1,})"#)
+    static let regex: RegEx = try! RegEx(pattern: #"(?<!https:/)(?<!http:/)(?<=["\s])(/[^/]{1}[^"\s]+\.[a-z]{1,})"#)
 //    static let a = #"(?<!https:/)(?<!http:/)(/[^/]{1}[^"\s]+\.[a-z]{1,})"#
 }
 
