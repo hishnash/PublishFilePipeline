@@ -91,5 +91,5 @@ public extension Modifier {
             return updatedHTML
        }
    }
-    static let regex: RegEx = try! RegEx(pattern: #"(/[^"\s]+\.[a-z]{1,})"#)
+    static let regex: RegEx = try! RegEx(pattern: #"\"(/[^"\s]+\.[a-z]{1,})\""#)
 }
