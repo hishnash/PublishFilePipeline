@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnsundell/ink.git",
       "state" : {
-        "revision" : "77c3d8953374a9cf5418ef0bd7108524999de85a",
-        "version" : "0.5.1"
+        "revision" : "bcc9f219900a62c4210e6db726035d7f03ae757b",
+        "version" : "0.6.0"
       }
     },
     {
@@ -41,17 +41,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnsundell/plot.git",
       "state" : {
-        "revision" : "b358860fe565eb53e98b1f5807eb5939c8124547",
-        "version" : "0.11.0"
+        "revision" : "271926b4413fe868739d99f5eadcf2bd6cd62fb8",
+        "version" : "0.14.0"
       }
     },
     {
       "identity" : "publish",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/johnsundell/publish.git",
+      "location" : "https://github.com/NilCoalescing/publish.git",
       "state" : {
-        "revision" : "1c8ad00d39c985cb5d497153241a2f1b654e0d40",
-        "version" : "0.9.0"
+        "branch" : "upstream",
+        "revision" : "ed530fada0c57fc3c244bfcb3d028d25a55a7819"
       }
     },
     {
