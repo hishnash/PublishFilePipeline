@@ -10,6 +10,7 @@ import Publish
 import Files
 
 public enum FilePipelineErrors: Error {
+    case concurrentError
     case fileNotFound(for: Path)
     case recursiveLookup(for: Path)
     case missingPipeline

@@ -8,13 +8,14 @@ import Dispatch
 import Publish
 import Files
 
-class PipelineState {
+internal class PipelineState {
     static var shared = PipelineState()
     
     private var queue = DispatchQueue(label: "Pipeline", attributes: [])
     private var concurrentQueue = DispatchQueue(label: "Pipeline.concurrent", attributes: [.concurrent])
 
     private var output: [FileKey: PipelineFile] = [:]
+    private var pendingPipelines: [FileKey: DispatchSemaphore] = [:]
 
     struct AdditionalFileKey: Hashable {
         let path: Path
@@ -44,11 +45,34 @@ class PipelineState {
         if let path = self.getCanonicalPathFromOutput(for: query, with: preprocessor) {
             return path
         }
+        let key = FileKey(query, preprocessor: preprocessor)
+        
+        let pendingSemaphore: DispatchSemaphore? = queue.sync {
+            if let semaphore = self.pendingPipelines[key] {
+                return semaphore
+            }
+            self.pendingPipelines[key] = Dispatch.DispatchSemaphore(value: 0)
+            return nil
+        }
+        
+        if let pendingSemaphore {
+            pendingSemaphore.wait()
+            if let path = self.getCanonicalPathFromOutput(for: query, with: preprocessor) {
+                return path
+            }
+            throw FilePipelineErrors.concurrentError
+        }
+        defer {
+            self.queue.sync {
+                let semaphore = self.pendingPipelines.removeValue(forKey: key)
+                semaphore?.signal()
+            }
+        }
         
         let pipeline = self.pipelines.first { $0.matches(query: query) }
         guard let pipeline else { throw FilePipelineErrors.missingPipeline }
         let file = try pipeline.run(query: query, preprocessor: preprocessor, on: context, with: self)
-        self.addResolved(file: file, with: FileKey(query, preprocessor: preprocessor))
+        self.addResolved(file: file, with: key)
         return file.canonical
     }
     
