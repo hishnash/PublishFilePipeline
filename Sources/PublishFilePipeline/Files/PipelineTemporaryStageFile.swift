@@ -9,15 +9,23 @@ import Foundation
 import Files
 import Publish
 
-public struct PipelineTemporaryStageFile {
-    var sourceFiles: [PipelineFileWrapper]
-    public var file: PipelineFileWrapper
+public struct PipelineTemporaryStageFile: PipelineFile {
+    public var source: [PipelineSourceFile]
+    var file: PipelineFileWrapper
+    public var canonical: Path
     
-    public init?(from sourceFiles: [PipelineFileWrapper], with data: Data, named: String) throws {
+    public var output: any PipelineOutputFile {
+        self.file
+    }
+    
+    
+    public init(
+        from sourceFile: PipelineFile,
+        with data: Data,
+        named: String
+    ) throws {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
-        
-        guard let sourceFile = sourceFiles.first else { return nil }
-        
+                
         let folderPath = sourceFile.canonical.deletingLastPathComponent()
         
         let folder: Folder
@@ -30,16 +38,22 @@ public struct PipelineTemporaryStageFile {
         
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
-        self.sourceFiles  = sourceFiles
+        self.source  = sourceFile.source
         self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
+        self.canonical = sourceFile.canonical.replacing(name: named)
     }
     
-    public init(from sourceFile: PipelineFileWrapper, with data: Data, named: String) throws {
+    public init(
+        from sourceFiles: [PipelineFile],
+        with data: Data,
+        named: String
+    ) throws {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
-        
-        let folderPath = sourceFile.canonical.deletingLastPathComponent()
+                
+        let folderPath = sourceFiles.first!.canonical.deletingLastPathComponent()
         
         let folder: Folder
+        
         if folderPath.string.isEmpty {
             folder = rootFolder
         } else {
@@ -48,11 +62,12 @@ public struct PipelineTemporaryStageFile {
         
         let file = try folder.createFileIfNeeded(withName: named, contents: data)
         
-        self.sourceFiles  = [sourceFile]
+        self.source = sourceFiles.flatMap { $0.source }
         self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
+        self.canonical = sourceFiles.first?.canonical.replacing(name: named) ?? Path(named)
     }
     
-    public init(from sourceFile: PipelineFileWrapper, named: String) throws {
+    public init(from sourceFile: PipelineFile, named: String) throws {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
         
         let folderPath = sourceFile.canonical.deletingLastPathComponent()
@@ -64,15 +79,16 @@ public struct PipelineTemporaryStageFile {
             folder = try rootFolder.createSubfolder(at: folderPath.string)
         }
         
-        let file = try sourceFile.file.copy(to: folder)
+        let file = try sourceFile.output.file.copy(to: folder)
         try file.rename(to: named)
         
         
-        self.sourceFiles  = [sourceFile]
+        self.source = sourceFile.source
         self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
+        canonical = sourceFile.canonical.replacing(name: named)
     }
     
-    public init(from sourceFile: PipelineFileWrapper, emtpyName named: String) throws {
+    public init(from sourceFile: PipelineFile, emptyNamed named: String) throws {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
         
         let folderPath = sourceFile.canonical.deletingLastPathComponent()
@@ -86,58 +102,8 @@ public struct PipelineTemporaryStageFile {
         
         let file = try folder.createFileIfNeeded(withName: named)
         
-        self.sourceFiles  = [sourceFile]
+        self.source = sourceFile.source
+        self.canonical = sourceFile.canonical.replacing(name: named)
         self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
-    }
-}
-
-extension PipelineTemporaryStageFile: PipelineFile {
-    public var source: [PipelineFileWrapper] {
-        self.sourceFiles
-    }
-    
-    public var output: [PipelineFileWrapper] {
-        [self.file]
-    }
-    
-    public var canonical: Path {
-        return self.file.canonical
-    }
-}
-
-public struct PipelineFileContainer {
-    public init(children: [PipelineFile], parents: [PipelineFile]) {
-        self.children = children
-        self.parents = parents
-    }
-    
-    var children: [PipelineFile]
-    var parents: [PipelineFile]
-}
-
-
-extension PipelineFileContainer: PipelineFile {
-    public var source: [PipelineFileWrapper] {
-        return self.parents.flatMap { file in
-            return file.source
-        }
-    }
-    
-    public var output: [PipelineFileWrapper] {
-        return self.children.flatMap { file in
-            return file.output
-        }
-    }
-    
-    public var canonical: Path {
-        self.children.first!.canonical
-    }
-}
-
-
-extension Path {
-    func deletingLastPathComponent() -> Path {
-        let path = self.string.split(separator: "/").dropLast().joined(separator: "/")
-        return Path(path)
     }
 }

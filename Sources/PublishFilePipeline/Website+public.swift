@@ -9,10 +9,13 @@ import Foundation
 import Publish
 import Files
 import Plot
-import RegEx
 
 
 public extension Website {
+    
+    /**
+     Add file programatically using raw Data.
+     */
     func add(
         resource data: Data,
         for resource: Path,
@@ -26,10 +29,14 @@ public extension Website {
         
         let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
         let file = try tempFolder.createFile(at: resource.string, contents: data)
-        PublishPipeline.state.set(file: file, for: resource, at: originPath)
-        try self.process(for: resource, with: context)
+        
+        PipelineState.shared.add(file: file, at: resource, with: originPath)
     }
     
+    
+    /**
+     Add file programatically using a file on disk.
+     */
     func add(
         file: File,
         for resource: Path,
@@ -38,10 +45,13 @@ public extension Website {
     ) throws {
         let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
         let fileToUse = try file.copy(to: tempFolder)
-        PublishPipeline.state.set(file: fileToUse, for: resource, at: originPath)
-        try self.process(for: resource, with: context)
+        
+        PipelineState.shared.add(file: fileToUse, at: resource, with: originPath)
     }
     
+    /**
+     Extract the processed File.
+     */
     func processedFile(
         for resource: Path,
         at originPath: Path = "Resources",
@@ -51,150 +61,93 @@ public extension Website {
         if resource.string.starts(with: "/") {
             resource = Path(String(resource.string.dropFirst()))
         }
-        if let file = PublishPipeline.state.outputFile(at: resource) {
-            return file
-        }
-        throw FilePipelineErrors.fileNotFound(for: resource)
+        
+        return try PipelineState.shared.getRawFile(for: resource, root: originPath, with: context).output.file
     }
     
+    /**
+     Get path for a file after it has passed through the pipeline.
+     This ignores any file mutations.
+     */
     func resourcePath(
         for resource: Path,
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws -> Path {
-
+        var resource = resource
+        if resource.string.starts(with: "/") {
+            resource = Path(String(resource.string.dropFirst()))
+        }        
+        
+        return try PipelineState.shared.resolvedPath(
+            for: .file(path: resource, root: originPath),
+            preprocessor: { EmptySingleFilePipelineStage() },
+            on: context
+        )
+    }
+    
+    /**
+     Get path for a file after it has passed through the pipeline.
+     This ignores any file mutations.
+     */
+    func resourcePath(
+        for resource: Path,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>,
+        @PipelineBuilder preprocessor: () -> SingleFilePipelineStage
+    ) throws -> Path {
         var resource = resource
         if resource.string.starts(with: "/") {
             resource = Path(String(resource.string.dropFirst()))
         }
         
-        let possibleOutputFile = PublishPipeline.state.outputFiles.first { outputFile in
-            return outputFile.source.contains { file in
-                return file.canonical == resource
-            }
-        }
-    
-        if let outputFile = possibleOutputFile {
-            PublishPipeline.state.reference(outputFile)
-            return Path("/" + outputFile.canonical.string)
-        }
-        
-        throw FilePipelineErrors.fileNotFound(for: resource)
+        return try PipelineState.shared.resolvedPath(
+            for: .file(path: resource, root: originPath),
+            preprocessor: preprocessor,
+            on: context
+        )
     }
     
-    func resourcePaths(
+    
+    /**
+     Get set of Paths for files after they have passed through the mutation for files that match a given type.
+     */
+    func resourcePath(
+        ofType type: String,
+        at originPath: Path = "Resources",
+        with context: PublishingContext<Self>,
+        @PipelineBuilder preprocessor: () -> SingleFilePipelineStage
+    ) throws -> Path {
+        return try PipelineState.shared.resolvedPath(
+            for: .type(extension: type, root: originPath),
+            preprocessor: preprocessor,
+            on: context
+        )
+    }
+    
+    /**
+     Get set of Paths for files after they have passed through the mutation for files that match a given type.
+     */
+    func resourcePath(
         ofType type: String,
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
-    ) throws -> Set<Path> {
-
-        let paths: [Path] = try self.files(at: originPath, with: context).compactMap { (file, path) in
-            guard file.extension == type else {
-                return nil
-            }
-            return path
-        }
-        var resolvedPaths: Set<Path> = []
-        for path in paths {
-            resolvedPaths.insert(
-                try self.resourcePath(for: path, with: context)
-            )
-        }
-        return resolvedPaths
+    ) throws -> Path {
+        return try PipelineState.shared.resolvedPath(
+            for: .type(extension: type, root: originPath),
+            preprocessor: { EmptySingleFilePipelineStage() },
+            on: context
+        )
     }
-    
-    
-    func file(
-        for resource: Path,
-        at originPath: Path = "Resources",
-        with context: PublishingContext<Self>
-    ) throws -> File {
-        if let file = PublishPipeline.state.additionalFiles[originPath]?[resource] {
-            return file
-        }
-        let folder = try context.folder(at: originPath)
-        return try folder.file(at: resource.string)
-    }
-    
-    func files(
-        at originPath: Path = "Resources",
-        with context: PublishingContext<Self>
-    ) throws -> [(file: File, path: Path)] {
-        let files = PublishPipeline.state.additionalFiles[originPath, default: [:]].map { (path, file) in
-            return (file: file, path: path)
-        }
-        
-        let folder = try context.folder(at: originPath)
-        let realFiles = Array(folder.files.recursive).map { file in
-            let path = Path(file.path(relativeTo: folder))
-            return (file: file, path: path)
-        }
-        
-        return files + realFiles
-    }
-    
-    func process(
-        for resource: Path,
-        at originPath: Path = "Resources",
-        with context: PublishingContext<Self>
-    ) throws {
 
-        let _pipelineFilter = installedPipelines.first { (filter) -> Bool in
-            filter.matches(resource)
-        }
-        
-        guard let pipelineFilter = _pipelineFilter else {
-            throw FilePipelineErrors.missingPipeline
-        }
-        
-        var outputs: [PipelineFile]
-        
-        switch pipelineFilter {
-        case .files(_, let pipeline):
-            
-            let allFiles = try self.files(at: originPath, with: context)
-            let files: [(path: Path, file: PipelineFile)] = allFiles.compactMap { (file, path) in
-                guard pipelineFilter.matches(path) else {
-                    return nil
-                }
-                return (path, PipelineFileWrapper(file: file, path: path))
-            }
-            
-            let ordered = files.sorted { a, b -> Bool in
-                a.path < b.path
-            }.map { (_, file) in
-                return file
-            }
-            
-            outputs = try pipeline.run(with: ordered, on: context)
-        case .any(let pipeline):
-            let file = try self.file(for: resource, at: originPath, with: context)
-            outputs = try pipeline.run(
-                with: [PipelineFileWrapper(file: file, path: resource)],
-                on: context
-            )
-        }
-        
-        PublishPipeline.state.add(outputs: outputs)
-    }
-}
-
-
-public extension Website {
     /// Return the absolute URL for a given path.
     /// - parameter path: The path to return a URL for.
     func resourceUrl(for path: Path, with context: PublishingContext<Self>) -> URL {
         guard !path.string.isEmpty else { return url }
         return url.appendingPathComponent(try! self.resourcePath(for: path, with: context).string)
     }
-}
 
-
-var installedPipelines: [PublishPipelineFilter] = []
-//var pendingPipeline: Set<Path> = []
-
-
-public extension Website {
+    
     /// Publish this website using a default pipeline. To build a completely
     /// custom pipeline, use the `publish(using:)` method.
     /// - parameter theme: The HTML theme to generate the website using.
@@ -217,12 +170,13 @@ public extension Website {
                  deployedUsing deploymentMethod: DeploymentMethod<Self>? = nil,
                  additionalSteps: [PublishingStep<Self>] = [],
                  plugins: [Plugin<Self>] = [],
-                 file: StaticString = #file) throws -> PublishedWebsite<Self> {
+                 file: StaticString = #file
+    ) throws -> PublishedWebsite<Self> {
         try publish(
             at: path,
             using: [
+                .resetPipeline(),
                 .group(plugins.map(PublishingStep.installPlugin)),
-                .processThroughPipeline(),
                 .addMarkdownFiles(),
                 .sortItems(by: \.date, order: .descending),
                 .group(additionalSteps),

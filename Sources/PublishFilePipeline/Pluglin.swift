@@ -9,18 +9,37 @@ import Foundation
 import Publish
 import Ink
 import Plot
-import RegEx
+import RegexBuilder
 
 
 public extension Plugin {
-    static func pipeline(for patern: RegEx, with stages: [PipelineStage]) -> Self {
+    static func pipeline(
+        for pattern: Regex<Substring>,
+        @PipelineBuilder with stages: @escaping () -> SingleFilePipelineStage
+    ) -> Self {
         Plugin(name: "Pipeline") { context in
-            installedPipelines.append(.files(regex: patern, with: PublishPipeline(stages)))
+            PipelineState.shared.addPipeline(
+                RegexPipeline(pattern: pattern, body: stages)
+            )
         }
     }
-    static func pipeline(with stages: [PipelineStage]) -> Self {
+    
+    static func pipeline(
+        forType: String,
+        @PipelineBuilder with stages:  @escaping () -> ReducingFilePipelineStage
+    ) -> Self {
         Plugin(name: "Pipeline") { context in
-            installedPipelines.append(.any(with: PublishPipeline(stages)))
+            PipelineState.shared.addPipeline(
+                ReducingFileTypePipeline(fileType: forType, body: stages)
+            )
+        }
+    }
+    
+    static func pipeline(
+        @PipelineBuilder with stages:  @escaping () -> SingleFilePipelineStage
+    ) -> Self {
+        Plugin(name: "Pipeline") { context in
+            PipelineState.shared.addPipeline(PlainPipeline(body: stages))
         }
     }
     
@@ -59,27 +78,8 @@ public extension Modifier {
     
     static func pipelineLinks<Site: Website>(with context: PublishingContext<Site>) -> Self {
         return Modifier(target: .links) { html, markdown in
-            let result = Modifier.regex.replaceMatches(in: html)  { match in
-               guard let path = match.values[1] else {
-                   return ""
-               }
-               do {
-                   let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
-                   return mappedPath.string
-               } catch {
-                   return String(match.values[0] ?? "")
-               }
-               
-           }
-           return result
-       }
-   }
-    static func pipelineHTML<Site: Website>(with context: PublishingContext<Site>) -> Self {
-        Modifier(target: .html) { html, markdown in
-            let updatedHTML = Modifier.regex.replaceMatches(in: html)  { match in
-                guard let path = match.values[1] else {
-                    return ""
-                }
+            let updatedHTML = html.replacing(htmLinkRegex) { match in
+                let path = match[PATH]
                 do {
                     let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
                     return mappedPath.string
@@ -88,11 +88,50 @@ public extension Modifier {
                 }
                 
             }
+            
             return updatedHTML
        }
    }
-    static let regex: RegEx = try! RegEx(pattern: #"(?<!https:/)(?<!http:/)(?<=["\s])(/[^/]{1}[^"\s]+\.[a-z]{1,})"#)
-//    static let a = #"(?<!https:/)(?<!http:/)(/[^/]{1}[^"\s]+\.[a-z]{1,})"#
+    static func pipelineHTML<Site: Website>(with context: PublishingContext<Site>) -> Self {
+        Modifier(target: .html) { html, markdown in
+            
+            let updatedHTML = html.replacing(htmLinkRegex) { match in
+                let path = match[PATH]
+                do {
+                    let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
+                    return mappedPath.string
+                } catch {
+                    fatalError("Unable to find file for `\(String(path))`")
+                }
+                
+            }
+            
+            return updatedHTML
+       }
+   }
+    
 }
 
 
+
+
+fileprivate let PATH = Reference<Substring>()
+fileprivate let htmLinkRegex = Regex {
+    ChoiceOf {
+        ChoiceOf {
+            CharacterClass.horizontalWhitespace
+            #"""#
+        }
+        Capture(as: PATH) {
+            "/"
+            CharacterClass.horizontalWhitespace.union(.anyOf(#"/"#)).inverted
+            OneOrMore {
+                CharacterClass.anyOf(#"""#).union(CharacterClass.horizontalWhitespace).inverted
+            }
+            "."
+            OneOrMore {
+                CharacterClass(.word)
+            }
+        }
+    }
+}

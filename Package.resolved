@@ -55,15 +55,6 @@
       }
     },
     {
-      "identity" : "regex",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/eneko/RegEx.git",
-      "state" : {
-        "revision" : "9256825ff3a4f0edcf293461dfad4e8578eb6b2f",
-        "version" : "0.3.0"
-      }
-    },
-    {
       "identity" : "shellout",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnsundell/shellout.git",
