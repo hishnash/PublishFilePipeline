@@ -8,7 +8,7 @@ import Foundation
 import Publish
 import Files
 
-enum FileQuery: Hashable, Codable {
+enum FileQuery: Equatable, Hashable, Codable {
     case file(path: Path, root: Path)
     case type(extension: String, root: Path)
     
@@ -38,21 +38,5 @@ public struct FileKey: Equatable, Hashable, Codable {
     init(_ query: FileQuery, preprocessor: SingleFilePipelineStage ) {
         self.query = query
         self.preprocessorTags = preprocessor.tags
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(query)
-        for tag in preprocessorTags {
-            hasher.combine(tag)
-        }
-    }
-    
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
-        guard lhs.query != rhs.query else {
-            return false
-        }
-        return lhs.preprocessorTags.elementsEqual(rhs.preprocessorTags) { l, r in
-            l.hashValue == r.hashValue
-        }
     }
 }

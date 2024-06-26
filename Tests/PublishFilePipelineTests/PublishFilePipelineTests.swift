@@ -23,6 +23,12 @@ struct Site: Website {
 }
 
 final class PublishFilePipelineTests: XCTestCase {
+    func testFileKey() {
+        let a = FileKey(.type(extension: "css", root: "Resources"), preprocessor: EmptySingleFilePipelineStage())
+        let b = FileKey(.type(extension: "css", root: "Resources"), preprocessor: EmptySingleFilePipelineStage())
+        XCTAssertEqual(a, b)
+    }
+    
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
