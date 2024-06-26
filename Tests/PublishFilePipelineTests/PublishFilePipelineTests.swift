@@ -43,7 +43,7 @@ final class PublishFilePipelineTests: XCTestCase {
         @PipelineBuilder var builder: ReducingFilePipelineStage {
             DropCommentsStage(prefix: "//")
             StringReplaceStage()
-            FileMergeStage(fileExtension: "bob")
+            FileMergeStage(path: "/static/merged.css")
             StringReplaceStage()
             CacheBustStage()
         }
@@ -52,7 +52,7 @@ final class PublishFilePipelineTests: XCTestCase {
         _ = Plugin<Site>.pipeline(forType: "css") {
             DropCommentsStage(prefix: "//")
             StringReplaceStage()
-            FileMergeStage(fileExtension: "bob")
+            FileMergeStage(path: "/static/merged.css")
             CacheBustStage()
         }
         

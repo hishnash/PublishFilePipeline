@@ -67,6 +67,30 @@ public struct PipelineTemporaryStageFile: PipelineFile {
         self.canonical = sourceFiles.first?.canonical.replacing(name: named) ?? Path(named)
     }
     
+    public init(
+        from sourceFiles: [PipelineFile],
+        with data: Data,
+        path: Path
+    ) throws {
+        let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
+                
+        let folderPath = sourceFiles.first!.canonical.deletingLastPathComponent()
+        
+        let folder: Folder
+        
+        if folderPath.string.isEmpty {
+            folder = rootFolder
+        } else {
+            folder = try rootFolder.createSubfolder(at: folderPath.string)
+        }
+        
+        let file = try folder.createFileIfNeeded(withName: path.name, contents: data)
+        
+        self.source = sourceFiles.flatMap { $0.source }
+        self.file = PipelineFileWrapper(file: file, path: Path(file.path(relativeTo: rootFolder)))
+        self.canonical = path
+    }
+    
     public init(from sourceFile: PipelineFile, named: String) throws {
         let rootFolder = try Folder.temporary.createSubfolder(at: UUID().uuidString)
         

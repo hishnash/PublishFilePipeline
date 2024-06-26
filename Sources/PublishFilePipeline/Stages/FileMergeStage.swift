@@ -12,10 +12,10 @@ public struct FileMergeStage: ReducingFilePipelineStage {
     
     public let tags: [String] = []
     
-    let fileExtension: String
+    let path: Path
     
-    public init (fileExtension: String) {
-        self.fileExtension = fileExtension
+    public init (path: Path) {
+        self.path = path
     }
     
     public func run<Site>(inputs: [any PipelineFile], on context: Publish.PublishingContext<Site>) throws -> any PipelineFile where Site : Publish.Website {
@@ -29,7 +29,7 @@ public struct FileMergeStage: ReducingFilePipelineStage {
         let file = try PipelineTemporaryStageFile(
             from: inputs,
             with: data,
-            named: "merged.\(self.fileExtension)"
+            path: path
         )
         
        return file

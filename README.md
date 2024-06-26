@@ -14,7 +14,7 @@ try MyWebSite().pipelinePublish(
         .pipeline(forType: "css") {                  // Run on all CSS files combining them into a single output file
             DropCommentsStage(prefix: "//")          // Drop any comments from the CSS file
             StringReplaceStage()                     // Resolve any urls within the css file that are not absolute
-            FileMergeStage(fileExtension: "css")     // Merge all CSS files into a single file
+            FileMergeStage("/static/merged.css")     // Merge all CSS files into a single file
             CacheBustStage()                         //  Cache bust the merged result
         },
         .pipeline(
@@ -44,7 +44,7 @@ When adding the hash of a file to its filename it is important that all links to
 .pipeline(forType: "css") {                  // Run on all CSS files
     DropCommentsStage(prefix: "//")          // Drop any comments from the CSS file (run on each file separately)
     StringReplaceStage()                     // Resolve any urls within the css file that are not absolute 
-    FileMergeStage(fileExtension: "css")     // Merge all CSS files into a single file
+    FileMergeStage("/static/merged.css")     // Merge all CSS files into a single file located at "/static/merged.css"
     CacheBustStage()                         // Cache bust the merged result
 }
 ```
