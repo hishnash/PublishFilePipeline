@@ -101,12 +101,11 @@ internal class PipelineState {
         case .file(let path, let root):
             return [try self.getRawFile(for: path, root: root, with: context)]
         case .type(let fileExtension, let root):
-            let projectRoot = try context.folder(at: "")
             let rootFolder = try context.folder(at: root)
             var files: [PipelineFile] = rootFolder.files.recursive.filter { file in
                 file.extension == fileExtension
             }.map { file in
-                let path = Path(file.path(relativeTo: projectRoot))
+                let path = Path(file.path(relativeTo: rootFolder))
                 return PipelineFileWrapper(file: file, path: path)
             }
             files +=  self.queue.sync {
