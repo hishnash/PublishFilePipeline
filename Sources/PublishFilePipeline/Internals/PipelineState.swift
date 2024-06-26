@@ -57,6 +57,10 @@ internal class PipelineState {
         
         if let pendingSemaphore {
             pendingSemaphore.wait()
+            defer {
+                // Signal so that any other waiting threads can continue
+                pendingSemaphore.signal()
+            }
             if let path = self.getCanonicalPathFromOutput(for: query, with: preprocessor) {
                 return path
             }
