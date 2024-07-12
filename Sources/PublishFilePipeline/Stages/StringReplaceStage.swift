@@ -88,7 +88,7 @@ public struct StringReplaceStage: SingleFilePipelineStage {
             do {
                 let replaced = try context.site.resourcePath(for: Path(String(pathString)), with: context)
                 didMatch = true
-                return "\"\(replaced.absoluteString)\""
+                return "URL(\(replaced.absoluteString))"
             } catch {
                 return "URL(\(pathString))"
             }
