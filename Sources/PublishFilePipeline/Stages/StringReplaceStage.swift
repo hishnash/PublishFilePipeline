@@ -41,7 +41,7 @@ public struct StringReplaceStage: SingleFilePipelineStage {
         }
         ZeroOrMore(.horizontalWhitespace)
         ")"
-    }
+    }.ignoresCase()
     
     public init () {}
     
