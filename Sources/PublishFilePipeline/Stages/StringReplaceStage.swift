@@ -30,6 +30,19 @@ public struct StringReplaceStage: SingleFilePipelineStage {
         #"""#
     }
     
+    let urlRegex = Regex {
+        "URL("
+        ZeroOrMore(.horizontalWhitespace)
+        Capture(as: path) {
+            "/"
+            OneOrMore {
+                CharacterClass.anyOf(#")"#).inverted
+            }
+        }
+        ZeroOrMore(.horizontalWhitespace)
+        ")"
+    }
+    
     public init () {}
     
     public func run<Site>(
@@ -64,9 +77,20 @@ public struct StringReplaceStage: SingleFilePipelineStage {
             do {
                 let replaced = try context.site.resourcePath(for: Path(String(pathString)), with: context)
                 didMatch = true
-                return "\"\(replaced.string)\""
+                return "\"\(replaced.absoluteString)\""
             } catch {
                 return "\"\(pathString)\""
+            }
+        }
+        
+        string.replace(self.urlRegex) { match in
+            let pathString = match[path]
+            do {
+                let replaced = try context.site.resourcePath(for: Path(String(pathString)), with: context)
+                didMatch = true
+                return "\"\(replaced.absoluteString)\""
+            } catch {
+                return "URL(\(pathString))"
             }
         }
 

@@ -7,6 +7,7 @@
 import Dispatch
 import Publish
 import Files
+import Foundation
 
 internal class PipelineState {
     static var shared = PipelineState()
