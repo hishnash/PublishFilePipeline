@@ -118,10 +118,7 @@ public extension Modifier {
 fileprivate let PATH = Reference<Substring>()
 fileprivate let htmLinkRegex = Regex {
     ChoiceOf {
-        ChoiceOf {
-            CharacterClass.horizontalWhitespace
-            #"""#
-        }
+        #"=""#
         Capture(as: PATH) {
             "/"
             CharacterClass.horizontalWhitespace.union(.anyOf(#"/"#)).inverted
@@ -133,5 +130,6 @@ fileprivate let htmLinkRegex = Regex {
                 CharacterClass(.word)
             }
         }
+        #"""#
     }
 }
