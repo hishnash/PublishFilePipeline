@@ -13,6 +13,11 @@ public extension PublishingStep {
     static func copyPipelineFiles() -> Self {
         step(named: "Copy files") { context in
             for pipelineFile in PipelineState.shared.getAllOutputs() {
+                if pipelineFile is StaticManifest.StaticManifestPipelineFile {
+                    // Skipping static manifest files
+                    continue
+                }
+                
                 let outputFile = pipelineFile.output.file
                 try context.copyToOutput(
                     outputFile,
