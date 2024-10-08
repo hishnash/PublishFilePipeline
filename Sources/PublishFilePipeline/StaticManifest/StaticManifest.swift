@@ -29,8 +29,7 @@ public struct StaticManifest: Codable {
     
     public var asPipelineFiles: [FileKey: PipelineFile] {
         self.files.mapValues { path in
-            let url = self.staticDomain.appending(path: path.string)
-            return StaticManifestPipelineFile(canonical: Path(url.absoluteString))
+            return StaticManifestPipelineFile(canonical: path)
         }
     }
 }
