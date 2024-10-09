@@ -14,5 +14,6 @@ public enum FilePipelineErrors: Error {
     case fileNotFound(for: Path)
     case recursiveLookup(for: Path)
     case missingPipeline
+    case notImplemented
 }
 

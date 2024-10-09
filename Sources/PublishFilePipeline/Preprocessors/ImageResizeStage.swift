@@ -14,11 +14,7 @@ import CoreGraphics
 import CoreImage
 
 public struct ImageResizeStage: SingleFilePipelineStage {
-    public enum Scale: Int, Codable {
-        case one = 1
-        case two = 2
-        case three = 3
-    }
+    
     
     let targetWidthInPoints: Int
     let scale: Scale
@@ -28,11 +24,6 @@ public struct ImageResizeStage: SingleFilePipelineStage {
         self.scale = scale
     }
     
-    enum ImageResizeError: Error {
-        case failedToLoadImage
-        case failedToSaveImage
-        case imageToSmall
-    }
     /**
      
      Resize the image contained within the input file.
@@ -70,9 +61,41 @@ public struct ImageResizeStage: SingleFilePipelineStage {
         try file.file.file.write(imageData)
         return file
     }
+}
+#else
+public struct ImageResizeStage: SingleFilePipelineStage {
+    let targetWidthInPoints: Int
+    let scale: Scale
     
-    public var tags: [String] {
-        ["ImageResizePreprocessor-\(targetWidthInPoints)@\(scale.rawValue)"]
-    }    
+    public init(targetWidthInPoints: Int, scale: Scale) {
+        self.targetWidthInPoints = targetWidthInPoints
+        self.scale = scale
+    }
+    
+    public func run<Site>(
+        input: any PipelineFile,
+        on context: Publish.PublishingContext<Site>
+    ) throws -> any PipelineFile where Site : Publish.Website {
+        throw FilePipelineErrors.notImplemented
+    }
 }
 #endif
+
+
+public extension ImageResizeStage {
+    enum Scale: Int, Codable {
+        case one = 1
+        case two = 2
+        case three = 3
+    }
+    
+    enum ImageResizeError: Error {
+        case failedToLoadImage
+        case failedToSaveImage
+        case imageToSmall
+    }
+    
+    var tags: [String] {
+        ["ImageResizePreprocessor-\(targetWidthInPoints)@\(scale.rawValue)"]
+    }
+}

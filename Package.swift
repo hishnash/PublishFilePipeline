@@ -15,7 +15,9 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/NilCoalescing/publish.git", branch: "upstream"),
-        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.7.1")
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.7.1"),
+        .package(url: "https://github.com/ainame/Swift-WebP.git", from: "0.5.0"),
+        .package(url: "https://github.com/awxkee/jxl-coder-swift.git", from: "1.7.3")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -24,7 +26,17 @@ let package = Package(
             name: "PublishFilePipeline",
             dependencies: [
                 .product(name: "Publish", package: "Publish"),
-                .product(name: "Crypto", package: "swift-crypto")
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(
+                    name: "WebP",
+                    package: "Swift-WebP",
+                    condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
+                ),
+                .product(
+                    name: "JxlCoder",
+                    package: "jxl-coder-swift",
+                    condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
+                ),
             ]
         ),
         .testTarget(

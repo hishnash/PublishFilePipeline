@@ -1,12 +1,11 @@
 //
-//  ImageAsJPEGStage.swift
+//  ImageAsWEBPStage.swift
+//  PublishFilePipeline
 //
-//
-//  Created by Matthaus Woolard on 25/06/2024.
+//  Created by Matthaus Woolard on 10/10/2024.
 //
 
-
-#if canImport(CoreImage)
+#if canImport(AppKit)
 import Foundation
 import Publish
 import Crypto
@@ -14,14 +13,21 @@ import Files
 import CoreGraphics
 import CoreImage
 import UniformTypeIdentifiers
+import ImageIO
+import JxlCoder
+import AppKit
 
-
-public struct ImageAsJPEGStage: SingleFilePipelineStage {
+public struct ImageAsJEPGXLStage: SingleFilePipelineStage {
     enum ImageConvertError: Error {
         case failedToLoadImage
         case failedToSaveImage
     }
-    public init() {}
+        
+    let quality: Int
+    
+    public init(quality: Int) {
+        self.quality = quality
+    }
     
     public func run<Site>(
         input: any PipelineFile,
@@ -29,28 +35,27 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
     ) throws -> any PipelineFile where Site : Website {
         let fileData = try input.output.file.read()
         
-        guard let image = CIImage(data: fileData) else {
+        guard let nsImage = NSImage(data: fileData) else {
             throw ImageConvertError.failedToLoadImage
         }
         
-        let newName = "\(input.canonical.name).converted.jpg"
+        let newName = "\(input.canonical.name).converted.jxl"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
-        let context = CIContext()
+        let imageData = try JXLCoder.encode(image: nsImage, effort: 9, quality: quality, decodingSpeed: .medium)
         
-        guard let imageData = context.jpegRepresentation(
-            of: image,
-            colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!
-        ) else {
-            throw ImageConvertError.failedToSaveImage
-        }
-                
         try file.file.file.write(imageData)
         return file
     }
 }
+
 #else
-public struct ImageAsJPEGStage: SingleFilePipelineStage {
-    public init() {}
+public struct ImageAsJEPGXLStage: SingleFilePipelineStage {
+    let quality: Int
+    
+    public init(quality: Int) {
+        self.quality = quality
+    }
+    
     public func run<Site>(
         input: any PipelineFile,
         on context: PublishingContext<Site>
@@ -60,8 +65,8 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
 }
 #endif
 
-public extension ImageAsJPEGStage {
+public extension ImageAsJEPGXLStage {
     var tags: [String] {
-        [ "asJPEG" ]
+        ["asJPEGXL@\(quality)"]
     }
 }

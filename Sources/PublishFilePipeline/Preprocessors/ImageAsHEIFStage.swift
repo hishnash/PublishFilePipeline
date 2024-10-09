@@ -1,10 +1,9 @@
 //
-//  ImageAsJPEGStage.swift
+//  ImageAsHEIC.swift
+//  PublishFilePipeline
 //
+//  Created by Matthaus Woolard on 10/10/2024.
 //
-//  Created by Matthaus Woolard on 25/06/2024.
-//
-
 
 #if canImport(CoreImage)
 import Foundation
@@ -14,13 +13,14 @@ import Files
 import CoreGraphics
 import CoreImage
 import UniformTypeIdentifiers
+import ImageIO
 
-
-public struct ImageAsJPEGStage: SingleFilePipelineStage {
+public struct ImageAsHEIFStage: SingleFilePipelineStage {
     enum ImageConvertError: Error {
         case failedToLoadImage
         case failedToSaveImage
     }
+    
     public init() {}
     
     public func run<Site>(
@@ -33,24 +33,28 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
             throw ImageConvertError.failedToLoadImage
         }
         
-        let newName = "\(input.canonical.name).converted.jpg"
+        let newName = "\(input.canonical.name).converted.heif"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         let context = CIContext()
         
-        guard let imageData = context.jpegRepresentation(
+        
+        
+        guard let imageData = context.heifRepresentation(
             of: image,
-            colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!
+            format: .RGB10,
+            colorSpace: CGColorSpace(name: CGColorSpace.displayP3)!
         ) else {
             throw ImageConvertError.failedToSaveImage
         }
-                
+        
         try file.file.file.write(imageData)
         return file
     }
 }
 #else
-public struct ImageAsJPEGStage: SingleFilePipelineStage {
+public struct ImageAsHEIFStage: SingleFilePipelineStage {
     public init() {}
+    
     public func run<Site>(
         input: any PipelineFile,
         on context: PublishingContext<Site>
@@ -60,8 +64,8 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
 }
 #endif
 
-public extension ImageAsJPEGStage {
+public extension ImageAsHEIFStage {
     var tags: [String] {
-        [ "asJPEG" ]
+        [ "asHEIF" ]
     }
 }
