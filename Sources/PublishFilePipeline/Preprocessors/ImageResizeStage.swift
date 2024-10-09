@@ -5,11 +5,13 @@
 //  Created by Matthaus Woolard on 18/06/2024.
 //
 
-#if canImport(CoreImage)
 import Foundation
 import Publish
 import Crypto
 import Files
+
+#if canImport(CoreImage)
+
 import CoreGraphics
 import CoreImage
 
