@@ -17,7 +17,8 @@ let package = Package(
         .package(url: "https://github.com/NilCoalescing/publish.git", branch: "upstream"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.7.1"),
         .package(url: "https://github.com/ainame/Swift-WebP.git", from: "0.5.0"),
-        .package(url: "https://github.com/awxkee/jxl-coder-swift.git", from: "1.7.3")
+        .package(url: "https://github.com/awxkee/jxl-coder-swift.git", from: "1.7.3"),
+        .package(url: "https://github.com/awxkee/avif.swift.git", from: "1.3.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -35,6 +36,11 @@ let package = Package(
                 .product(
                     name: "JxlCoder",
                     package: "jxl-coder-swift",
+                    condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
+                ),
+                .product(
+                    name: "avif",
+                    package: "avif.swift",
                     condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
                 ),
             ]
