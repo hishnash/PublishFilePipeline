@@ -38,7 +38,8 @@ public struct DebugLocalCachedResultStage: SingleFilePipelineStage {
         let file = try context.cacheFile(named: "LocalCachedResultStage.\(hash).data.cached")
         let name = try context.cacheFile(named: "LocalCachedResultStage.\(hash).name.cached")
         guard let data = try? file.read(),
-              let nameString = try? name.readAsString(encodedAs: .utf8) else {
+              let nameString = try? name.readAsString(encodedAs: .utf8),
+              !data.isEmpty else {
             let output = try self.content().run(input: input, on: context)
             try file.write(output.output.file.read())
             try name.write(output.canonical.name, encoding: .utf8)
