@@ -12,7 +12,7 @@ public struct DebugLocalCachedResultStage: SingleFilePipelineStage {
     @PipelineBuilder
     let content: () -> SingleFilePipelineStage
     
-    public init(content: @escaping () -> SingleFilePipelineStage) {
+    public init(@PipelineBuilder content: @escaping () -> SingleFilePipelineStage) {
         self.content = content
     }
     
