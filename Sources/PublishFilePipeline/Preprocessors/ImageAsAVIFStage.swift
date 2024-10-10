@@ -24,9 +24,13 @@ public struct ImageAsAVIFStage: SingleFilePipelineStage {
         case failedToLoadImage
         case failedToSaveImage
     }
-        
-
-    public init() {}
+    
+    
+    let quality: Double
+    
+    public init(quality: Double = 0.9) {
+        self.quality = quality
+    }
     
     public func run<Site>(
         input: any PipelineFile,
@@ -41,7 +45,8 @@ public struct ImageAsAVIFStage: SingleFilePipelineStage {
         let newName = "\(input.canonical.name).converted.avif"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         
-        let imageData = try AVIFEncoder.encode(image: image)
+        
+        let imageData = try AVIFEncoder.encode(image: image, quality: quality)
         
         try file.file.file.write(imageData)
         return file
@@ -51,7 +56,11 @@ public struct ImageAsAVIFStage: SingleFilePipelineStage {
 #else
 public struct ImageAsAVIFStage: SingleFilePipelineStage {
     
-    public init() {}
+    let quality: Double
+    
+    public init(quality: Double = 0.9) {
+        self.quality = quality
+    }
         
     public func run<Site>(
         input: any PipelineFile,
@@ -65,6 +74,6 @@ public struct ImageAsAVIFStage: SingleFilePipelineStage {
 public extension ImageAsAVIFStage {
     
     var tags: [String] {
-        ["asAVIF"]
+        ["asAVIF@\(quality)"]
     }
 }
