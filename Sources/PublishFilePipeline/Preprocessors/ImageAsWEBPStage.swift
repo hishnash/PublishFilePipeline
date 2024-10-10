@@ -17,6 +17,7 @@ import CoreImage
 import UniformTypeIdentifiers
 import ImageIO
 import WebP
+import AppKit
 
 public struct ImageAsWEBPStage: SingleFilePipelineStage {
     enum ImageConvertError: Error {
@@ -38,7 +39,7 @@ public struct ImageAsWEBPStage: SingleFilePipelineStage {
     ) throws -> any PipelineFile where Site : Website {
         let fileData = try input.output.file.read()
         
-        guard let image = CIImage(data: fileData), let cgImage = image.cgImage else {
+        guard let image = NSImage(data: fileData) else {
             throw ImageConvertError.failedToLoadImage
         }
         
@@ -46,7 +47,8 @@ public struct ImageAsWEBPStage: SingleFilePipelineStage {
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         
         let encoder = WebPEncoder()
-        let imageData = try encoder.encode(BGRA: cgImage, config: .preset(preset.webPPreset, quality: quality))
+        
+        let imageData = try encoder.encode(image, config: .preset(preset.webPPreset, quality: quality))
         
         try file.file.file.write(imageData)
         return file
