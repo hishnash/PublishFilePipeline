@@ -54,10 +54,11 @@ public struct ImageResizeStage: SingleFilePipelineStage {
         
         let scaleFactor = CGFloat(targetWidth) / image.extent.width
         let scaledImage = image.transformed(by: .init(scaleX: scaleFactor, y: scaleFactor), highQualityDownsample: true)
-        let newName = "\(input.canonical.name)-w\(self.targetWidthInPoints)pt@\(scale.rawValue)x.png"
+        let newName = "\(input.canonical.nameExcludingExtension)-w\(self.targetWidthInPoints)pt@\(scale.rawValue)x.png"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         let context = CIContext()
-        guard let imageData = context.pngRepresentation(of: scaledImage, format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
+ 
+        guard let imageData = context.pngRepresentation(of: scaledImage, format: .rgbXf, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
             throw ImageResizeError.failedToSaveImage
         }
         try file.file.file.write(imageData)
