@@ -1,6 +1,15 @@
 {
-  "originHash" : "af76a622783087e3834c45cfd7a1243621a44800faaea659509c81b2fd7b02c0",
+  "originHash" : "9b935faaeffc736f726506c5d163dd2ad4b14792b465f842109a275602d4138f",
   "pins" : [
+    {
+      "identity" : "avif.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awxkee/avif.swift.git",
+      "state" : {
+        "revision" : "349ecd8752838feb71f9d4e017fb480aa38f984b",
+        "version" : "1.6.0"
+      }
+    },
     {
       "identity" : "codextended",
       "kind" : "remoteSourceControl",
@@ -47,12 +56,66 @@
       }
     },
     {
+      "identity" : "libaom.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awxkee/libaom.swift.git",
+      "state" : {
+        "revision" : "506308364f5f83e3ae2797521d9b3958205ec0e8",
+        "version" : "1.0.4"
+      }
+    },
+    {
+      "identity" : "libdav1d.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awxkee/libdav1d.swift.git",
+      "state" : {
+        "revision" : "b4c002ba08f35806b7bfc3c0f65c626e3308e6c8",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "libsvtav1enc.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awxkee/libsvtav1enc.swift",
+      "state" : {
+        "revision" : "fff1840be980fb2a9b7b3a0245499db95ff753df",
+        "version" : "1.0.3"
+      }
+    },
+    {
+      "identity" : "libwebp-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awxkee/libwebp-ios.git",
+      "state" : {
+        "revision" : "09ab26afc64c55a49332c396c4b465c278fcb05f",
+        "version" : "1.1.1"
+      }
+    },
+    {
       "identity" : "libwebp-xcode",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SDWebImage/libwebp-Xcode.git",
       "state" : {
         "revision" : "b2b1d20a90b14d11f6ef4241da6b81c1d3f171e4",
         "version" : "1.3.2"
+      }
+    },
+    {
+      "identity" : "libyuv.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awxkee/libyuv.swift.git",
+      "state" : {
+        "revision" : "6ccc8fc35d5f6e5b419c0792f0b1de8e5a448e45",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "nuke",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kean/Nuke.git",
+      "state" : {
+        "revision" : "0ead44350d2737db384908569c012fe67c421e4d",
+        "version" : "12.8.0"
       }
     },
     {
