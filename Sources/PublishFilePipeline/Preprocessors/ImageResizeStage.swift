@@ -58,7 +58,12 @@ public struct ImageResizeStage: SingleFilePipelineStage {
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         let context = CIContext()
  
-        guard let imageData = context.pngRepresentation(of: scaledImage, format: .rgbXf, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
+        let format: CIFormat = image.isOpaque ? .rgbXf: .RGBAf
+        
+        guard let imageData = context.pngRepresentation(
+            of: scaledImage,
+            format: format,
+            colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
             throw ImageResizeError.failedToSaveImage
         }
         try file.file.file.write(imageData)
