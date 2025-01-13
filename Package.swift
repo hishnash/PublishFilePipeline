@@ -11,9 +11,11 @@ let package = Package(
         .library(
             name: "PublishFilePipeline",
             targets: ["PublishFilePipeline"]),
+        .library(name: "FilePipeline", targets: ["FilePipeline"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+        .package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
         .package(url: "https://github.com/NilCoalescing/publish.git", branch: "upstream"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.7.1"),
         .package(url: "https://github.com/ainame/Swift-WebP.git", from: "0.5.0"),
@@ -27,6 +29,12 @@ let package = Package(
             name: "PublishFilePipeline",
             dependencies: [
                 .product(name: "Publish", package: "Publish"),
+                .target(name: "FilePipeline")
+            ]
+        ),
+        .target(
+            name: "FilePipeline",
+            dependencies: [
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(
                     name: "WebP",
@@ -43,6 +51,7 @@ let package = Package(
                     package: "avif.swift",
                     condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
                 ),
+                .product(name: "Files", package: "Files")
             ]
         ),
         .testTarget(

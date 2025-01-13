@@ -9,7 +9,7 @@ import Foundation
 import Publish
 import Files
 import Plot
-
+import FilePipeline
 
 public extension Website {
     
@@ -30,7 +30,11 @@ public extension Website {
         let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
         let file = try tempFolder.createFile(at: resource.string, contents: data)
         
-        PipelineState.shared.add(file: file, at: resource, with: originPath)
+        FilePipeline.add(
+            file,
+            at: PipelinePath(resource),
+            with: PipelinePath(originPath)
+        )
     }
     
     
@@ -46,7 +50,11 @@ public extension Website {
         let tempFolder = try Folder.temporary.createSubfolder(named: UUID().uuidString)
         let fileToUse = try file.copy(to: tempFolder)
         
-        PipelineState.shared.add(file: fileToUse, at: resource, with: originPath)
+        FilePipeline.add(
+            fileToUse,
+            at: PipelinePath(resource),
+            with: PipelinePath(originPath)
+        )
     }
     
     /**
@@ -61,8 +69,11 @@ public extension Website {
         if resource.string.starts(with: "/") {
             resource = Path(String(resource.string.dropFirst()))
         }
-        
-        return try PipelineState.shared.getRawFile(for: resource, root: originPath, with: context).output.file
+        return try FilePipeline.getRawFile(
+            for: PipelinePath(resource),
+            root: PipelinePath(originPath),
+            with: context
+        )
     }
     
     /**
@@ -79,11 +90,15 @@ public extension Website {
             resource = Path(String(resource.string.dropFirst()))
         }        
         
-        return try PipelineState.shared.resolvedPath(
-            for: .file(path: resource, root: originPath),
+        let pipelinePath = try FilePipeline.resolvedPath(
+            for: .file(
+                path: PipelinePath(resource),
+                root: PipelinePath(originPath)
+            ),
             preprocessor: { EmptySingleFilePipelineStage() },
             on: context
         )
+        return Path(pipelinePath)
     }
     
     /**
@@ -101,11 +116,15 @@ public extension Website {
             resource = Path(String(resource.string.dropFirst()))
         }
         
-        return try PipelineState.shared.resolvedPath(
-            for: .file(path: resource, root: originPath),
+        let pipelinePath = try FilePipeline.resolvedPath(
+            for: .file(
+                path: PipelinePath(resource),
+                root: PipelinePath(originPath)
+            ),
             preprocessor: preprocessor,
             on: context
         )
+        return Path(pipelinePath)
     }
     
     
@@ -118,11 +137,16 @@ public extension Website {
         with context: PublishingContext<Self>,
         @PipelineBuilder preprocessor: () -> SingleFilePipelineStage
     ) throws -> Path {
-        return try PipelineState.shared.resolvedPath(
-            for: .type(extension: type, root: originPath),
+        
+        let pipelinePath = try FilePipeline.resolvedPath(
+            for: .type(
+                extension: type,
+                root: PipelinePath(originPath)
+            ),
             preprocessor: preprocessor,
             on: context
         )
+        return Path(pipelinePath)
     }
     
     /**
@@ -133,11 +157,15 @@ public extension Website {
         at originPath: Path = "Resources",
         with context: PublishingContext<Self>
     ) throws -> Path {
-        return try PipelineState.shared.resolvedPath(
-            for: .type(extension: type, root: originPath),
+        let pipelinePath = try FilePipeline.resolvedPath(
+            for: .type(
+                extension: type,
+                root: PipelinePath(originPath)
+            ),
             preprocessor: { EmptySingleFilePipelineStage() },
             on: context
         )
+        return Path(pipelinePath)
     }
 
     /// Return the absolute URL for a given path.

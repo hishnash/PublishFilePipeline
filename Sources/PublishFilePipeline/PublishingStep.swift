@@ -8,23 +8,12 @@
 import Foundation
 import Publish
 import Files
+import FilePipeline
 
 public extension PublishingStep {
     static func copyPipelineFiles() -> Self {
         step(named: "Copy files") { context in
-            for pipelineFile in PipelineState.shared.getAllOutputs() {
-                if pipelineFile is StaticManifest.StaticManifestPipelineFile {
-                    // Skipping static manifest files
-                    continue
-                }
-                
-                let outputFile = pipelineFile.output.file
-                try context.copyToOutput(
-                    outputFile,
-                    to: pipelineFile.canonical.deletingLastPathComponent(),
-                    with: pipelineFile.canonical.name
-                )
-            }
+            try FilePipeline.copyPipelineFiles(with: context)
         }
     }
     
@@ -32,32 +21,32 @@ public extension PublishingStep {
     static func loadPipelineManifest(_ file: @escaping () async throws -> StaticManifest ) -> Self {
         step(named: "Loading Pipeline Manifest") { context in
             let manifest = try await file()
-            PipelineState.shared.load(manifest: manifest)
+            FilePipeline.load(manifest: manifest)
         }
     }
     
     static func writePipelineManifest(staticDomain: URL, filePath: Path = "/static/static-manifest.json") -> Self {
         step(named: "Write Pipeline Manifest") { context in
-            let outputs = PipelineState.shared.getStaticOutputs()
-            let manifest = StaticManifest(staticDomain: staticDomain, files: outputs)
-            let encoder = try JSONEncoder().encode(manifest)
-            let file = try context.createOutputFile(at: filePath)
-            try file.write(encoder)
+            try FilePipeline.writePipelineManifest(
+                staticDomain: staticDomain,
+                filePath: PipelinePath(filePath),
+                with: context
+            )
         }
     }
     
     static func resetPipeline() -> Self {
         step(named: "Resetting") { context in
-            PipelineState.shared = PipelineState()
+            FilePipeline.reset()
         }
     }
 }
 
 
 extension PublishingContext {
-    func copyToOutput(
+    public func copyToOutput(
         _ file: File,
-        to path: Path,
+        to path: PipelinePath,
         with name: String
     ) throws {
         var file = file
@@ -66,7 +55,21 @@ extension PublishingContext {
             file = try file.copy(to: folder)
             try file.rename(to: name, keepExtension: false)
         }
-        let targetFolder = try createOutputFolder(at: path)
+        let targetFolder = try createOutputFolder(at: Path(path))
         try file.copy(to: targetFolder)
     }
 }
+
+
+extension Path {
+    init(_ pipelinePath: PipelinePath) {
+        self.init(pipelinePath.string)
+    }
+}
+extension PipelinePath {
+    init(_ path: Path) {
+        self.init(path.string)
+    }
+}
+
+

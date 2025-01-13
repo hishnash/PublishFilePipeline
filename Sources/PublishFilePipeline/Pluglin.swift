@@ -10,6 +10,7 @@ import Publish
 import Ink
 import Plot
 import RegexBuilder
+import FilePipeline
 
 
 public extension Plugin {
@@ -18,8 +19,9 @@ public extension Plugin {
         @PipelineBuilder with stages: @escaping () -> SingleFilePipelineStage
     ) -> Self {
         Plugin(name: "Pipeline") { context in
-            PipelineState.shared.addPipeline(
-                RegexPipeline(pattern: pattern, body: stages)
+            FilePipeline.addPipeline(
+                for: pattern,
+                with: stages
             )
         }
     }
@@ -29,8 +31,9 @@ public extension Plugin {
         @PipelineBuilder with stages:  @escaping () -> ReducingFilePipelineStage
     ) -> Self {
         Plugin(name: "Pipeline") { context in
-            PipelineState.shared.addPipeline(
-                ReducingFileTypePipeline(fileType: forType, body: stages)
+            FilePipeline.addPipeline(
+                forType: forType,
+                with: stages
             )
         }
     }
@@ -39,7 +42,7 @@ public extension Plugin {
         @PipelineBuilder with stages:  @escaping () -> SingleFilePipelineStage
     ) -> Self {
         Plugin(name: "Pipeline") { context in
-            PipelineState.shared.addPipeline(PlainPipeline(body: stages))
+            FilePipeline.addPipeline(with: stages)
         }
     }
     
