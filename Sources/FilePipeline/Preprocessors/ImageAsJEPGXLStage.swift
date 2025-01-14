@@ -61,7 +61,7 @@ extension NSImage {
         guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
             return false
         }
-        return cgImage.colorSpace?.numberOfComponents ?? 0 > 3
+        return !CIImage(cgImage: cgImage).isOpaque
     }
 }
 
