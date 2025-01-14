@@ -47,9 +47,6 @@ enum IsAlpha: IfElse.PipelineCondition {
 }
 #endif
 
-public extension IfElse.PipelineCondition {
-    static var isAlpha: IfElse.PipelineCondition {
-        IsAlpha()
-    }
+public extension IfElse.PipelineCondition where Self == IsAlpha {
+    static var isAlpha: Self { .init() }
 }
-
