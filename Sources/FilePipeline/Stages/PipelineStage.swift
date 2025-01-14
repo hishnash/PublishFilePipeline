@@ -10,7 +10,6 @@ import Crypto
 import Files
 
 
-
 public protocol MultiFilePipelineStage  {
     func run(inputs: [PipelineFile], on context: PipelineContext) throws -> [PipelineFile]
     var tags: [String] { get }

@@ -146,72 +146,14 @@ internal struct ReducedFilePipelineGroup: ReducingFilePipelineStage {
 
 
 
-@resultBuilder
-public struct PipelineBuilder {
-    public static func buildPartialBlock(first: ExpandingFilePipelineStage) -> ExpandingFilePipelineStage {
-        first
+extension Optional: MultiFilePipelineStage where Wrapped == SingleFilePipelineStage {}
+
+extension Optional: SingleFilePipelineStage where Wrapped == SingleFilePipelineStage {
+    public func run(input: any PipelineFile, on context: any PipelineContext) throws -> any PipelineFile {
+        try self?.run(input: input, on: context) ?? input
     }
     
-    public static func buildPartialBlock(first: ReducingFilePipelineStage) -> ReducingFilePipelineStage {
-        first
+    public var tags: [String] {
+        self?.tags ?? []
     }
-    
-    public static func buildPartialBlock(first: SingleFilePipelineStage) -> SingleFilePipelineStage {
-        first
-    }
-    
-    public static func buildPartialBlock(first: MultiFilePipelineStage) -> MultiFilePipelineStage {
-        first
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: MultiFilePipelineStage,
-        next: ReducingFilePipelineStage
-    ) -> ReducingFilePipelineStage {
-        ReducingFilePipelineGroup(first: accumulated, reduce: next)
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: ReducingFilePipelineStage,
-        next: SingleFilePipelineStage
-    ) -> ReducingFilePipelineStage {
-        ReducedFilePipelineGroup(accumulated: accumulated, next: next)
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: ExpandingFilePipelineStage,
-        next: MultiFilePipelineStage
-    ) -> ExpandingFilePipelineStage {
-        InitialExpandingFilePipelineGroup(accumulated: accumulated, next: next)
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: SingleFilePipelineStage,
-        next: ExpandingFilePipelineStage
-    ) -> ExpandingFilePipelineStage {
-        DeferredExpandingFilePipelineGroup(accumulated: accumulated, next: next)
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: ExpandingFilePipelineStage,
-        next: ReducingFilePipelineStage
-    ) -> SingleFilePipelineStage {
-        ExpandingReducingFilePipelineGroup(accumulated: accumulated, next: next)
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: SingleFilePipelineStage,
-        next: SingleFilePipelineStage
-    ) -> SingleFilePipelineStage {
-        SingleFilePipelineGroup(stages: [accumulated, next])
-    }
-    
-    public static func buildPartialBlock(
-        accumulated: MultiFilePipelineStage,
-        next: MultiFilePipelineStage
-    ) -> MultiFilePipelineStage {
-        MultiFilePipelineGroup(stages: [accumulated, next])
-    }
-    
-    
 }

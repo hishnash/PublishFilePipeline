@@ -70,7 +70,9 @@ final class PublishFilePipelineTests: XCTestCase {
         
         
         _ = Plugin<Site>.pipeline {
-
+            if true {
+                EmptySingleFilePipelineStage()
+            }
             CacheBustStage()
         }
         
