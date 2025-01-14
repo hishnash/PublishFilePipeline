@@ -1,6 +1,7 @@
 import XCTest
 import Publish
 import Plot
+@testable import FilePipeline
 @testable import PublishFilePipeline
 import RegexBuilder
 
@@ -69,6 +70,7 @@ final class PublishFilePipelineTests: XCTestCase {
         
         
         _ = Plugin<Site>.pipeline {
+
             CacheBustStage()
         }
         
