@@ -34,9 +34,10 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
         guard let image = CIImage(data: fileData) else {
             throw ImageConvertError.failedToLoadImage
         }
-        guard image.colorSpace?.numberOfComponents ?? 0 <= 3 else {
+        guard image.isOpaque else {
             throw ImageConvertError.imageHasAlphaChannel
         }
+        
         
         let newName = "\(input.canonical.nameExcludingExtension).converted.jpg"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)

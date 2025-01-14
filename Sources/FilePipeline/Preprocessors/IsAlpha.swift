@@ -33,7 +33,7 @@ public struct IsAlpha: If.PipelineCondition {
         guard let image = CIImage(data: fileData) else {
             throw ImageTestError.failedToLoadImage
         }
-        return image.colorSpace?.numberOfComponents == 4
+        return !image.isOpaque
     }
 }
 

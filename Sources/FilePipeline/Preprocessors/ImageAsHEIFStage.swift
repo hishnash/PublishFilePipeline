@@ -35,7 +35,7 @@ public struct ImageAsHEIFStage: SingleFilePipelineStage {
             throw ImageConvertError.failedToLoadImage
         }
         
-        guard image.colorSpace?.numberOfComponents ?? 0 <= 3 else {
+        guard image.isOpaque else {
             throw ImageConvertError.imageHasAlphaChannel
         }
         
