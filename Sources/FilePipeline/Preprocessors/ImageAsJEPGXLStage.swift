@@ -42,10 +42,26 @@ public struct ImageAsJEPGXLStage: SingleFilePipelineStage {
         
         let newName = "\(input.canonical.nameExcludingExtension).converted.jxl"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
-        let imageData = try JXLCoder.encode(image: nsImage, effort: 9, quality: quality, decodingSpeed: .medium)
+    
+        let imageData = try JXLCoder.encode(
+            image: nsImage,
+            colorSpace: nsImage.hasAlphaChannel ? .rgba : .rgb,
+            effort: 9,
+            quality: quality,
+            decodingSpeed: .medium
+        )
         
         try file.file.file.write(imageData)
         return file
+    }
+}
+
+extension NSImage {
+    var hasAlphaChannel: Bool {
+        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return false
+        }
+        return cgImage.colorSpace?.numberOfComponents ?? 0 > 3
     }
 }
 

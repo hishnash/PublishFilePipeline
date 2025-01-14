@@ -44,7 +44,6 @@ public struct ImageAsAVIFStage: SingleFilePipelineStage {
         let newName = "\(input.canonical.nameExcludingExtension).converted.avif"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         
-        
         let imageData = try AVIFEncoder.encode(image: image, quality: quality)
         
         try file.file.file.write(imageData)

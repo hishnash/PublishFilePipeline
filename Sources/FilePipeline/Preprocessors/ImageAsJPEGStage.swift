@@ -21,6 +21,7 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
     enum ImageConvertError: Error {
         case failedToLoadImage
         case failedToSaveImage
+        case imageHasAlphaChannel
     }
     public init() {}
     
@@ -32,6 +33,9 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
         
         guard let image = CIImage(data: fileData) else {
             throw ImageConvertError.failedToLoadImage
+        }
+        guard image.colorSpace?.numberOfComponents ?? 0 <= 3 else {
+            throw ImageConvertError.imageHasAlphaChannel
         }
         
         let newName = "\(input.canonical.nameExcludingExtension).converted.jpg"
