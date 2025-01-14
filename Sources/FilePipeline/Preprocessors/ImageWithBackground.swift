@@ -75,7 +75,7 @@ public struct ImageWithBackground: SingleFilePipelineStage {
         guard let imageData = context.pngRepresentation(
             of: combinedImage,
             format: .rgbXf,
-            colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!
+            colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!
         ) else {
             throw ImageError.failedToSaveImage
         }
