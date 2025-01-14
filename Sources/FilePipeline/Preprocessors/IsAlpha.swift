@@ -22,7 +22,7 @@ enum ImageTestError: Error {
     case failedToLoadImage
 }
 
-public struct IsAlpha: IfElse.PipelineCondition {
+public struct IsAlpha: If.PipelineCondition {
     public var tag: String { "isAlphaImage" }
     
     public init() {}
@@ -38,7 +38,7 @@ public struct IsAlpha: IfElse.PipelineCondition {
 }
 
 #else
-enum IsAlpha: IfElse.PipelineCondition {
+enum IsAlpha: If.PipelineCondition {
     static let tag: String = "isAlphaImage"
     
     static func evaluate(input: any PipelineFile, on context: any PipelineContext) throws -> Bool {
@@ -47,6 +47,6 @@ enum IsAlpha: IfElse.PipelineCondition {
 }
 #endif
 
-public extension IfElse.PipelineCondition where Self == IsAlpha {
+public extension If.PipelineCondition where Self == IsAlpha {
     static var isAlpha: Self { .init() }
 }

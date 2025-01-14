@@ -6,7 +6,7 @@
 //
 
 
-public struct IfElse: SingleFilePipelineStage {
+public struct If: SingleFilePipelineStage {
     public protocol PipelineCondition {
         func evaluate(
             input: any PipelineFile,
@@ -25,8 +25,8 @@ public struct IfElse: SingleFilePipelineStage {
     
     public init(
         condition: PipelineCondition,
-        @PipelineBuilder true truePathway: @escaping () -> SingleFilePipelineStage,
-        @PipelineBuilder false falsePathway: @escaping () -> SingleFilePipelineStage
+        @PipelineBuilder _ truePathway: @escaping () -> SingleFilePipelineStage,
+        @PipelineBuilder else falsePathway: @escaping () -> SingleFilePipelineStage
     ) {
         self.condition = condition
         self.truePathway = truePathway()
@@ -47,9 +47,9 @@ public struct IfElse: SingleFilePipelineStage {
     
     public var tags: [String] {
         self.truePathway.tags.map {
-            "ifElse-\(condition.tag)-true-\($0)"
+            "if-\(condition.tag)-\($0)"
         } + self.falsePathway.tags.map {
-            "ifElse-\(condition.tag)-false-\($0)"
+            "else-\(condition.tag)-\($0)"
         }
     }
 }
