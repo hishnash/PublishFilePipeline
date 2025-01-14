@@ -42,7 +42,7 @@ public struct ImageAsWEBPStage: SingleFilePipelineStage {
             throw ImageConvertError.failedToLoadImage
         }
         
-        let newName = "\(input.canonical.name).converted.webp"
+        let newName = "\(input.canonical.nameExcludingExtension).converted.webp"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         
         let encoder = WebPEncoder()

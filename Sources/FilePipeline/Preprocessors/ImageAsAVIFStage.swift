@@ -41,7 +41,7 @@ public struct ImageAsAVIFStage: SingleFilePipelineStage {
             throw ImageConvertError.failedToLoadImage
         }
         
-        let newName = "\(input.canonical.name).converted.avif"
+        let newName = "\(input.canonical.nameExcludingExtension).converted.avif"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         
         

@@ -22,10 +22,12 @@ enum ImageTestError: Error {
     case failedToLoadImage
 }
 
-public enum IsAlpha: IfElse.PipelineCondition {
-    public static let tag: String = "isAlphaImage"
+public struct IsAlpha: IfElse.PipelineCondition {
+    public var tag: String { "isAlphaImage" }
     
-    public static func evaluate(input: any PipelineFile, on context: any PipelineContext) throws -> Bool {
+    public init() {}
+    
+    public func evaluate(input: any PipelineFile, on context: any PipelineContext) throws -> Bool {
         let fileData = try input.output.file.read()
         
         guard let image = CIImage(data: fileData) else {
@@ -46,6 +48,8 @@ enum IsAlpha: IfElse.PipelineCondition {
 #endif
 
 public extension IfElse.PipelineCondition {
-    static var isAlpha: IsAlpha.Type { IsAlpha.self }
+    static var isAlpha: IfElse.PipelineCondition {
+        IsAlpha()
+    }
 }
 

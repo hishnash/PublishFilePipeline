@@ -34,7 +34,7 @@ public struct ImageAsHEIFStage: SingleFilePipelineStage {
             throw ImageConvertError.failedToLoadImage
         }
         
-        let newName = "\(input.canonical.name).converted.heif"
+        let newName = "\(input.canonical.nameExcludingExtension).converted.heif"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         let context = CIContext()
         

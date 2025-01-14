@@ -8,12 +8,12 @@
 
 public struct IfElse: SingleFilePipelineStage {
     public protocol PipelineCondition {
-        static func evaluate(
+        func evaluate(
             input: any PipelineFile,
             on context: PipelineContext
         ) throws -> Bool
         
-        static var tag: String { get }
+        var tag: String { get }
     }
         
     @PipelineBuilder
@@ -21,10 +21,10 @@ public struct IfElse: SingleFilePipelineStage {
     
     @PipelineBuilder
     let falsePathway: SingleFilePipelineStage
-    let condition: PipelineCondition.Type
+    let condition: PipelineCondition
     
     public init(
-        condition: PipelineCondition.Type,
+        condition: PipelineCondition,
         @PipelineBuilder true truePathway: @escaping () -> SingleFilePipelineStage,
         @PipelineBuilder false falsePathway: @escaping () -> SingleFilePipelineStage
     ) {

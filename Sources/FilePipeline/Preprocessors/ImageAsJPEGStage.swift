@@ -34,7 +34,7 @@ public struct ImageAsJPEGStage: SingleFilePipelineStage {
             throw ImageConvertError.failedToLoadImage
         }
         
-        let newName = "\(input.canonical.name).converted.jpg"
+        let newName = "\(input.canonical.nameExcludingExtension).converted.jpg"
         let file = try PipelineTemporaryStageFile(from: input, emptyNamed: newName)
         let context = CIContext()
         
