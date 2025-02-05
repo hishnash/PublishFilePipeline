@@ -39,11 +39,11 @@ public struct IsAlpha: If.PipelineCondition {
 
 #else
 public struct IsAlpha: If.PipelineCondition {
-    static let tag: String = "isAlphaImage"
+    public var tag: String { "isAlphaImage" }
     
     public init() {}
     
-    static func evaluate(input: any PipelineFile, on context: any PipelineContext) throws -> Bool {
+    public func evaluate(input: any PipelineFile, on context: any PipelineContext) throws -> Bool {
         throw FilePipelineErrors.notImplemented
     }
 }
