@@ -9,6 +9,22 @@ import Foundation
 import Crypto
 import Files
 
+public struct Color {
+    let red: Int
+    let green: Int
+    let blue: Int
+    
+    public init(red: Int, green: Int, blue: Int) {
+        self.red = red
+        self.green = green
+        self.blue = blue
+    }
+    
+    var tag: String {
+        "RGB(\(red),\(green),\(blue))"
+    }
+}
+
 #if canImport(CoreImage)
 
 import CoreGraphics
@@ -17,21 +33,6 @@ import UniformTypeIdentifiers
 
 
 public struct ImageWithBackground: SingleFilePipelineStage {
-    public struct Color {
-        let red: Int
-        let green: Int
-        let blue: Int
-        
-        public init(red: Int, green: Int, blue: Int) {
-            self.red = red
-            self.green = green
-            self.blue = blue
-        }
-        
-        var tag: String {
-            "RGB(\(red),\(green),\(blue))"
-        }
-    }
     
     enum ImageError: Error {
         case failedToLoadImage
