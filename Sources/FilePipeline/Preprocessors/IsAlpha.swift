@@ -41,6 +41,8 @@ public struct IsAlpha: If.PipelineCondition {
 enum IsAlpha: If.PipelineCondition {
     static let tag: String = "isAlphaImage"
     
+    public init() {}
+    
     static func evaluate(input: any PipelineFile, on context: any PipelineContext) throws -> Bool {
         throw FilePipelineErrors.notImplemented
     }
