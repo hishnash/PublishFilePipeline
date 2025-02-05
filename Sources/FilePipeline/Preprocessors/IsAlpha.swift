@@ -38,7 +38,7 @@ public struct IsAlpha: If.PipelineCondition {
 }
 
 #else
-enum IsAlpha: If.PipelineCondition {
+public struct IsAlpha: If.PipelineCondition {
     static let tag: String = "isAlphaImage"
     
     public init() {}
