@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
         .package(url: "https://github.com/NilCoalescing/publish.git", branch: "upstream"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.7.1"),
-        .package(url: "https://github.com/ainame/Swift-WebP.git", from: "0.5.0"),
+//        .package(url: "https://github.com/ainame/Swift-WebP.git", from: "0.5.0"),
         .package(url: "https://github.com/awxkee/jxl-coder-swift.git", from: "1.7.3"),
         .package(url: "https://github.com/awxkee/avif.swift.git", from: "1.3.1")
     ],
@@ -36,11 +36,11 @@ let package = Package(
             name: "FilePipeline",
             dependencies: [
                 .product(name: "Crypto", package: "swift-crypto"),
-                .product(
-                    name: "WebP",
-                    package: "Swift-WebP",
-                    condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
-                ),
+//                .product(
+//                    name: "WebP",
+//                    package: "Swift-WebP",
+//                    condition: TargetDependencyCondition.when(platforms: [Platform.macOS])
+//                ),
                 .product(
                     name: "JxlCoder",
                     package: "jxl-coder-swift",
