@@ -85,7 +85,7 @@ public extension Modifier {
                 let path = match[PATH]
                 do {
                     let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
-                    return mappedPath.string
+                    return mappedPath.absoluteString
                 } catch {
                     fatalError("Unable to find file for `\(String(path))`")
                 }
@@ -102,7 +102,7 @@ public extension Modifier {
                 let path = match[PATH]
                 do {
                     let mappedPath = try context.site.resourcePath(for: Path(String(path)), with: context)
-                    return mappedPath.string
+                    return mappedPath.absoluteString
                 } catch {
                     fatalError("Unable to find file for `\(String(path))`")
                 }
